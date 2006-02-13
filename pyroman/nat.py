@@ -20,6 +20,7 @@
 from pyroman import firewall
 from util import Util
 from port import Port
+from chain import Chain
 
 class Nat:
 	"""
@@ -85,13 +86,15 @@ class Nat:
 		pfilter = ""
 		if self.port and self.dport:
 			pfilter = self.dport.get_filter_proto() + " " + self.dport.get_filter_port("s")
-			target = target + ":%d" % self.port.port
+			target = target + ":%s" % self.port.port
 		elif self.port:
 			pfilter = self.port.get_filter_proto() + " " + self.port.get_filter_port("s")
 
+		c = firewall.chains["natPOST"]
 		for sip in server.ip:
 			filter = iff[0] + " -s %s" % sip
-			firewall.append_rule("POSTROUTING", target=target, filter=filter+" "+pfilter, table="nat", loginfo=self.loginfo)
+			c.append("%s %s -j %s" % (filter, pfilter, target), self.loginfo)
+			#firewall.append_rule("POSTROUTING", target=target, filter=filter+" "+pfilter, table="nat", loginfo=self.loginfo)
 
 	def gen_dnat(self, client, server):
 		"""
@@ -104,11 +107,13 @@ class Nat:
 		if self.port:
 			pfilter = self.port.get_filter_proto() + " " + self.port.get_filter_port("d")
 
+		c = firewall.chains["natPRE"]
 		for sip in server.ip:
 			target = "DNAT --to-destination %s" % sip
 			if self.dport:
-				target = target + ":%d" % self.dport.port
-			firewall.append_rule(parent="PREROUTING", target=target, filter=filter+" "+pfilter, table="nat", loginfo=self.loginfo)
+				target = target + ":%s" % self.dport.port
+			c.append("%s %s -j %s" % (filter, pfilter, target), self.loginfo)
+			#firewall.append_rule(parent="PREROUTING", target=target, filter=filter+" "+pfilter, table="nat", loginfo=self.loginfo)
 
 	def generate(self):
 		for c in self.client:

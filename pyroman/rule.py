@@ -74,7 +74,8 @@ class Rule:
 		if self.service:
 			vrules = self.service.get_filter("d")
 		for vr in vrules:
-			firewall.append_rule(chain, self.target, vr, loginfo=self.loginfo)
+			chain.append("%s -j %s" % (vr, self.target), self.loginfo)
+			#firewall.append_rule(chain, self.target, vr, loginfo=self.loginfo)
 
 	def prepare(self):
 		"""

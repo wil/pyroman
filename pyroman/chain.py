@@ -63,8 +63,9 @@ class Chain:
 		Make a chain for the given hosts and add it to the interface chain
 		"""
 		chain = Chain.make_chain_name(inface, outface, client, server)
-		if not chain in firewall.chains:
-			firewall.rules.append( ("%s -N %s" % (config.iptables, chain), loginfo) )
+		if not firewall.chains.has_key(chain):
+			#firewall.rules.append( ("%s -N %s" % (config.iptables, chain), loginfo) )
+			c = Chain(chain)
 
 			parent = "FORWARD"
 
@@ -79,6 +80,8 @@ class Chain:
 				if not inface:
 					inface = outface
 				outface = None
+
+			p = firewall.chains[parent]
 
 			# this is localhost talking to localhost...
 			if server and server.islocalhost() and client and client.islocalhost():
@@ -101,10 +104,59 @@ class Chain:
 				for sr in srules:
 					for infi in ifrules:
 						for outfi in ofrules:
-							filter = "%s %s %s %s" % (infi, outfi, cr, sr)
-							firewall.append_rule(parent, chain, filter, loginfo=loginfo)
+							filter = "%s %s %s %s -j %s" % (infi, outfi, cr, sr, chain)
+							p.append(filter, loginfo)
+							#filter = "%s %s %s %s" % (infi, outfi, cr, sr)
+							#firewall.append_rule(parent, chain, filter, loginfo=loginfo)
 
-			firewall.chains[chain]=True
-		return chain
+			firewall.chains[chain]=c
+			return c
+		else:
+			return firewall.chains[chain]
 	get_chain = staticmethod(get_chain)
 
+	def __init__(self, name, default="-", table="filter"):
+		"""
+		Create a new chain
+
+		name -- Name for this chain
+		default -- default target for this chain (for INPUT, OUTPUT, ACCEPT)
+		table -- table this chain resides in
+		"""
+		self.name = name
+		self.table = table
+		self.default = default
+		self.rules = []
+		self.rules_end = []
+	
+	def append(self, statement, loginfo):
+		"""
+		Append a statement to a chain
+		"""
+		self.rules.append([statement, loginfo])
+
+	def append_end(self, statement, loginfo):
+		"""
+		Append a statement to a chain
+		"""
+		self.rules_end.append([statement, loginfo])
+	
+	def dump_init(self):
+		print ":%s %s" % (self.name, self.default)
+
+	def dump_rules(self):
+		for r in self.rules:
+			print "-A %s %s" % (self.name, r[0])
+		for r in self.rules_end:
+			print "-A %s %s" % (self.name, r[0])
+			
+	def get_init(self):
+		return ":%s %s\n" % (self.name, self.default)
+
+	def get_rules(self):
+		lines = []
+		for r in self.rules:
+			lines.append("-A %s %s\n" % (self.name, r[0]))
+		for r in self.rules_end:
+			lines.append("-A %s %s\n" % (self.name, r[0]))
+		return lines

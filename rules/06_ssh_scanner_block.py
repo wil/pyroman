@@ -14,24 +14,19 @@ Note that if you e.g. have a script which will log in to many SSH servers
 quickly, you should either whitelist your source host or disable this, since
 such a script can easily trigger these rules.
 """
-append_rule_early("""
-# Look for new incoming SSH connections
-$ipt -A INPUT -i ethEXT -p tcp --dport 22 -m state --state NEW \
-        -m recent --set --name SSH
-$ipt -A FORWARD -i ethEXT -p tcp --dport 22 -m state --state NEW \
-        -m recent --set --name SSH
-
-## uncomment this if you want to log them
-#$ipt -A INPUT -i ethEXT -p tcp --dport 22 -m state --state NEW \
-#       -m recent --update --seconds 60 --hitcount 5 --rttl \
-#       --name SSH -j LOG --log-prefix "SSH_brute_force "
-#$ipt -A FORWARD -i ethEXT -p tcp --dport 22 -m state --state NEW \
-#       -m recent --update --seconds 60 --hitcount 5 --rttl \
-#       --name SSH -j LOG --log-prefix "SSH_brute_force "
-
+iptables("INPUT", "-i ethEXT -p tcp --dport 22 -m state --state NEW \
+        -m recent --set --name SSH")
+iptables("FORWARD","-i ethEXT -p tcp --dport 22 -m state --state NEW \
+        -m recent --set --name SSH")
+# uncomment to log
+#iptables("INPUT", "-i ethEXT -p tcp --dport 22 -m state --state NEW \
+#        -m recent --update --seconds 60 --hitcount 5 --rttl \
+#        --name SSH -j LOG --log-prefix \"SSH_brute_force \"")
+#iptables("FORWARD", "-i ethEXT -p tcp --dport 22 -m state --state NEW \
+#        -m recent --update --seconds 60 --hitcount 5 --rttl \
+#        --name SSH -j LOG --log-prefix \"SSH_brute_force \"")
 # Drop connections when they hit the treshold
-$ipt -A INPUT -i ethEXT -p tcp --dport 22 -m state --state NEW \
-        -m recent --update --seconds 60 --hitcount 5 --rttl --name SSH -j DROP
-$ipt -A FORWARD -i ethEXT -p tcp --dport 22 -m state --state NEW \
-        -m recent --update --seconds 60 --hitcount 5 --rttl --name SSH -j DROP
-""")
+iptables("INPUT",  "-i ethEXT -p tcp --dport 22 -m state --state NEW \
+        -m recent --update --seconds 60 --hitcount 5 --rttl --name SSH -j DROP")
+iptables("FORWARD","-i ethEXT -p tcp --dport 22 -m state --state NEW \
+        -m recent --update --seconds 60 --hitcount 5 --rttl --name SSH -j DROP")

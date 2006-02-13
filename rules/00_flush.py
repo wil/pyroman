@@ -2,25 +2,14 @@
 These are basic rules to reset the firewall to an "empty" state,
 by emptying any chain and removing them
 """
-append_rule_early("""
-# reset filter chains
-$ipt -P INPUT   DROP
-$ipt -P OUTPUT  DROP
-$ipt -P FORWARD DROP
-$ipt -F
-$ipt -X
-# reset nat chains
-$ipt -t nat -P OUTPUT  ACCEPT
-$ipt -t nat -P PREROUTING ACCEPT
-$ipt -t nat -P POSTROUTING ACCEPT
-$ipt -t nat -F
-$ipt -t nat -X
-# reset mangle chains
-$ipt -t mangle -P INPUT   ACCEPT
-$ipt -t mangle -P OUTPUT  ACCEPT
-$ipt -t mangle -P FORWARD ACCEPT
-$ipt -t mangle -P PREROUTING ACCEPT
-$ipt -t mangle -P POSTROUTING ACCEPT
-$ipt -t mangle -F
-$ipt -t mangle -X
-""")
+add_chain("INPUT", default="DROP")
+add_chain("OUTPUT", default="DROP")
+add_chain("FORWARD", default="DROP")
+add_chain("OUTPUT", id="natOUT", default="ACCEPT", table="nat")
+add_chain("PREROUTING", id="natPRE", default="ACCEPT", table="nat")
+add_chain("POSTROUTING", id="natPOST", default="ACCEPT", table="nat")
+add_chain("INPUT", id="manIN", default="ACCEPT", table="mangle")
+add_chain("OUTPUT", id="manOUT", default="ACCEPT", table="mangle")
+add_chain("FORWARD", id="manFWD", default="ACCEPT", table="mangle")
+add_chain("PREROUTING", id="manPRE", default="ACCEPT", table="mangle")
+add_chain("POSTROUTING", id="manPOST", default="ACCEPT", table="mangle")

@@ -21,6 +21,7 @@ import re, socket, inspect, sys
 import config
 from util import Util
 from popen2 import popen3, Popen4
+from select import select
 
 class Firewall:
 	hostname = socket.gethostname()
@@ -35,11 +36,7 @@ class Firewall:
 		self.hosts = {}
 		self.interfaces = {}
 		self.nats = []
-		self.rules_early = []
 		self.rules_todo = []
-		self.rules = []
-		self.rules_end = []
-
 		self.chains = {}
 
 	def append(self, list, cmd, loginfo=None):
@@ -107,15 +104,24 @@ class Firewall:
 		Print the specifications as a shell script, including echo statements
 		to explain the lines' origin. Useful for debugging.
 		"""
-		for (line, info) in self.rules_early:
-			print "echo '%s'" % info
-			print "%s" % line
-		for (line, info) in self.rules:
-			print "echo '%s'" % info
-			print "%s" % line
-		for (line, info) in self.rules_end:
-			print "echo '%s'" % info
-			print "%s" % line
+		# collect tables
+		tables = []
+		for c in self.chains.values():
+			if not c.table in tables:
+				tables.append(c.table)
+		# process tables
+		for t in tables:
+			print "*%s" % t
+			# first create all tables
+			for c in self.chains.values():
+				if c.table == t:
+					c.dump_init()
+			# then write rules (which might -j to a table not yet created otherwise)
+			for c in self.chains.values():
+				if c.table == t:
+					c.dump_rules()
+			# commit after each table
+			print "COMMIT"
 
 	def iptables_save(self):
 		"""
@@ -160,17 +166,37 @@ class Firewall:
 		# now try to execute the new rules
 		successful = False
 		try:
-			ru = self.rules_early + self.rules + self.rules_end
-			for (line, info) in ru:
-				ipex = Popen4(line)
-				ir, iw = ipex.fromchild, ipex.tochild
-				iw.close()
-				for l in ir.readlines():
-					sys.stderr.write(l)
-				ir.close()
-				if ipex.wait() != 0:
-					successful = False
-					raise "An error occurred when calling %s (generated from %s)" % (line, info)
+			ipr = Popen4(config.iptablesset)
+			rr, rw = ipr.fromchild, ipr.tochild
+
+			# collect tables
+			tables = []
+			for c in self.chains.values():
+				if not c.table in tables:
+					tables.append(c.table)
+			# process tables
+			for t in tables:
+				rw.write("*%s\n" % t)
+				# first create all tables
+				for c in self.chains.values():
+					if c.table == t:
+						rw.write(c.get_init())
+				# then write rules (which might -j to a table not yet created otherwise)
+				for c in self.chains.values():
+					if c.table == t:
+						for l in c.get_rules():
+							rw.write(l)
+				# commit after each table
+				rw.write("COMMIT\n")
+			rw.close()
+
+			# output any error
+			for line in rr.readlines():
+				sys.stderr.write(line)
+
+			if ipr.wait() != 0:
+				successful = False
+				raise "An error occurred during setting the new firewall"
 			successful = True
 		finally:
 			if not successful:

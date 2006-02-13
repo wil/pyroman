@@ -19,6 +19,7 @@
 #SOFTWARE.
 from pyroman import firewall
 from util import Util
+from chain import Chain
 import config
 import port, service, interface, host, nat, rule
 
@@ -90,34 +91,6 @@ def add_nat(client="", server=None, ip=None, port=None, dport=None, dir="in"):
 		(client, server) = (server, client)
 	firewall.nats.append(nat.Nat(client, server, ip, port, dport, dir, loginfo))
 
-def append_rule_early(cmd):
-	"""
-	Append a rule to the "early" (initialization) set.
-	"Early" rules will be executed in sequence and are usually used to
-	setup special rules such as accepting "established" connections or
-	filtering typical attack patterns.
-
-	cmd -- shell commands, which may use $ipt and $ipr as placeholders
-	       for the iptables and ip (from iproute2) commands. Shell-like
-	       comments (lines starting with #) will be ignored.
-	"""
-	loginfo = Util.get_callee(3)
-	firewall.append(firewall.rules_early, cmd, loginfo)
-
-def append_rule_end(cmd):
-	"""
-	Append a rule to the "end" (finalization) set
-	"End" rules will be executed in sequence after the generated rules,
-	and are usually used to setup some fallback behaviour at the end of
-	the chains, such as logging packets before dropping them etc.
-
-	cmd -- shell commands, which may use $ipt and $ipr as placeholders
-	       for the iptables and ip (from iproute2) commands. Shell-like
-	       comments (lines starting with #) will be ignored.
-	"""
-	loginfo = Util.get_callee(3)
-	firewall.append(firewall.rules_end, cmd, loginfo)
-
 def add_rule(target, server="", client="", service=""):
 	"""
 	Add an arbitrary rule to the list of rules.
@@ -137,6 +110,20 @@ def add_rule(target, server="", client="", service=""):
 			for svc in Util.splitter.split(service):
 				firewall.rules_todo.append(rule.Rule(target,srv,cli,svc,loginfo))
 	
+def add_chain(name, default="-", table="filter", id=None):
+	"""
+	Create a new firewall chain.
+
+	name -- name of the chain in iptables
+	id -- internal ID for the chain, defaults to name
+	default -- default target, use for built-in chains
+	table -- table this chain resides in, defaults to "filter"
+	"""
+	if not id:
+		id = name
+	assert(not firewall.chains.has_key(id))
+	firewall.chains[id] = Chain(name, default=default, table=table)
+
 def allow(server="", client="", service=""):
 	"""
 	Add an 'allow' rule to the list of rules.
@@ -169,3 +156,13 @@ def drop(server="", client="", service=""):
 	service -- service this rule applies to
 	"""
 	add_rule(config.drop, server, client, service)
+
+def iptables(chain, filter):
+	assert(firewall.chains.has_key(chain))
+	loginfo = Util.get_callee(3)
+	firewall.chains[chain].append(filter, loginfo)
+
+def iptables_end(chain, filter):
+	assert(firewall.chains.has_key(chain))
+	loginfo = Util.get_callee(3)
+	firewall.chains[chain].append_end(filter, loginfo)
