@@ -158,11 +158,24 @@ def drop(server="", client="", service=""):
 	add_rule(Firewall.drop, server, client, service)
 
 def iptables(chain, filter):
+	"""
+	Add an arbitrary iptables command.
+
+	chain -- chain to add the rules to
+	filter -- iptables parameters
+	"""
 	assert(Firewall.chains.has_key(chain))
 	loginfo = Util.get_callee(3)
 	Firewall.chains[chain].append(filter, loginfo)
 
 def iptables_end(chain, filter):
+	"""
+	Add an arbitrary iptables command after any statement added
+	by the "allow", "drop", "reject", "add_rule" or "iptables" commands.
+
+	chain -- chain to add the rules to
+	filter -- iptables parameters
+	"""
 	assert(Firewall.chains.has_key(chain))
 	loginfo = Util.get_callee(3)
 	Firewall.chains[chain].append_end(filter, loginfo)
