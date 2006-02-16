@@ -1,0 +1,13 @@
+Installation:
+
+Copy the contents of the "lib" directory to a location of your choice,
+Recommendation: /usr/share/pyroman/ (should be fairly FHS compliant)
+and modify the main pyroman command to use this path, so it will find
+it's libraries.
+
+Then create your rules in a directory of your choice, for example
+/etc/pyroman, and put that path into the pyroman launcher, too.
+
+You can find some example rules in examples/, copy all the basic
+files and then have a look at the detailed example and adopt that to
+suit your needs.

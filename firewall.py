@@ -1,4 +1,12 @@
 #!/usr/bin/python
+""" Pyroman, an iptables firewall configuration tool """
+# where the pyroman libraries are found - e.g. /usr/share/pyroman
+library_path = "./lib"
+# where the rules are located - e.g. /etc/pyroman
+rules_path = "./examples"
+# timeout for the "safe" mode invocation
+safe_timeout = 30
+
 #Copyright (c) 2006 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,17 +28,20 @@
 #SOFTWARE.
 import sys, glob, os
 
+# path to the main pyroman code
+sys.path.insert(0, library_path)
+
 # usercommands, the Firewall class and the firewall object
 # should be available to user rules
-from pyroman.pyroman import Firewall
-from pyroman.commands import *
+from pyroman import Firewall
+from commands import *
 
 # When given the "safe" parameter, setup a timeout.
 if len(sys.argv) > 1 and sys.argv[1] == "safe":
-	Firewall.timeout = 30
+	Firewall.timeout = safe_timeout
 
 # load user rules alphabetically
-rfiles = glob.glob(os.path.join("rules","*.py"))
+rfiles = glob.glob(os.path.join(rules_path,"*.py"))
 rfiles.sort()
 for nam in rfiles:
 	execfile(nam)
