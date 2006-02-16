@@ -17,7 +17,7 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-from pyroman import firewall
+from pyroman import Firewall
 from util import Util
 
 class Interface:
@@ -34,7 +34,7 @@ class Interface:
 		if name == "" or not Util.verify_name(name):
 			raise "Interface lacking a valid name (name: %s, iface: %s) at %s" \
 				% (name, iface, loginfo)
-		if firewall.interfaces.has_key(name):
+		if Firewall.interfaces.has_key(name):
 			raise "Duplicate interface specification: %s at %s" % (name, loginfo)
 		if iface == "":
 			raise "Interface definition lacking kernel interfaces: %s at %s" \
@@ -44,7 +44,7 @@ class Interface:
 		self.loginfo = loginfo
 
 		# register with firewall
-		firewall.interfaces[name] = self
+		Firewall.interfaces[name] = self
 
 	def get_filter(self, dir):
 		"""

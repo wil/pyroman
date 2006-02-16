@@ -17,7 +17,7 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-from pyroman import firewall
+from pyroman import Firewall
 from util import Util
 from port import Port
 from chain import Chain
@@ -90,11 +90,10 @@ class Nat:
 		elif self.port:
 			pfilter = self.port.get_filter_proto() + " " + self.port.get_filter_port("s")
 
-		c = firewall.chains["natPOST"]
+		c = Firewall.chains["natPOST"]
 		for sip in server.ip:
 			filter = iff[0] + " -s %s" % sip
 			c.append("%s %s -j %s" % (filter, pfilter, target), self.loginfo)
-			#firewall.append_rule("POSTROUTING", target=target, filter=filter+" "+pfilter, table="nat", loginfo=self.loginfo)
 
 	def gen_dnat(self, client, server):
 		"""
@@ -107,19 +106,18 @@ class Nat:
 		if self.port:
 			pfilter = self.port.get_filter_proto() + " " + self.port.get_filter_port("d")
 
-		c = firewall.chains["natPRE"]
+		c = Firewall.chains["natPRE"]
 		for sip in server.ip:
 			target = "DNAT --to-destination %s" % sip
 			if self.dport:
 				target = target + ":%s" % self.dport.port
 			c.append("%s %s -j %s" % (filter, pfilter, target), self.loginfo)
-			#firewall.append_rule(parent="PREROUTING", target=target, filter=filter+" "+pfilter, table="nat", loginfo=self.loginfo)
 
 	def generate(self):
 		for c in self.client:
 			for s in self.server:
-				client = firewall.hosts[c]
-				server = firewall.hosts[s]
+				client = Firewall.hosts[c]
+				server = Firewall.hosts[s]
 				# sanity checks, that should be moved to "verify"
 				if not client or not server:
 					raise "Client or server not found for NAT defined at %s" % self.loginfo

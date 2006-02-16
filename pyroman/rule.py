@@ -17,7 +17,7 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-from pyroman import firewall
+from pyroman import Firewall
 from service import Service
 from port import PortInvalidSpec
 from chain import Chain
@@ -75,7 +75,6 @@ class Rule:
 			vrules = self.service.get_filter("d")
 		for vr in vrules:
 			chain.append("%s -j %s" % (vr, self.target), self.loginfo)
-			#firewall.append_rule(chain, self.target, vr, loginfo=self.loginfo)
 
 	def prepare(self):
 		"""
@@ -83,17 +82,17 @@ class Rule:
 		"""
 		# already checked in verify run.
 		if self.server != "":
-			self.server = firewall.hosts[self.server]
+			self.server = Firewall.hosts[self.server]
 		else:
 			self.server = None
 		# already checked in verify run.
 		if self.client != "":
-			self.client = firewall.hosts[self.client]
+			self.client = Firewall.hosts[self.client]
 		else:
 			self.client = None
 		# already checked in verify run.
 		if self.service != "":
-			self.service = firewall.services[self.service]
+			self.service = Firewall.services[self.service]
 		else:
 			self.service = None
 
@@ -105,20 +104,20 @@ class Rule:
 		"""
 		# verify server name given
 		if self.server != "":
-			if not firewall.hosts.has_key(self.server):
+			if not Firewall.hosts.has_key(self.server):
 				raise "Rule refers to unknown host as server: '%s' at %s" \
 					% (self.server, self.loginfo)
 		# verify client name given
 		if self.client != "":
-			if not firewall.hosts.has_key(self.client):
+			if not Firewall.hosts.has_key(self.client):
 				raise "Rule refers to unknown host as client: '%s' at %s" \
 					% (self.client, self.loginfo)
 		# for services not yet defined, try to autocreate them
-		if self.service != "" and self.service not in firewall.services:
+		if self.service != "" and self.service not in Firewall.services:
 			try:
 				s = Service(name=self.service,sports="",dports=self.service,
 					include=None, loginfo=self.loginfo)
-				firewall.services[self.service] = s
+				Firewall.services[self.service] = s
 			except PortInvalidSpec:
 				raise "Rule refers to unknown service: '%s' at %s" \
 					% (self.service, self.loginfo)

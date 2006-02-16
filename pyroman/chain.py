@@ -17,8 +17,7 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-import config
-from pyroman import firewall
+from pyroman import Firewall
 
 class Chain:
 	"""
@@ -63,8 +62,7 @@ class Chain:
 		Make a chain for the given hosts and add it to the interface chain
 		"""
 		chain = Chain.make_chain_name(inface, outface, client, server)
-		if not firewall.chains.has_key(chain):
-			#firewall.rules.append( ("%s -N %s" % (config.iptables, chain), loginfo) )
+		if not Firewall.chains.has_key(chain):
 			c = Chain(chain, loginfo)
 
 			parent = "FORWARD"
@@ -81,7 +79,7 @@ class Chain:
 					inface = outface
 				outface = None
 
-			p = firewall.chains[parent]
+			p = Firewall.chains[parent]
 
 			# this is localhost talking to localhost...
 			if server and server.islocalhost() and client and client.islocalhost():
@@ -106,13 +104,11 @@ class Chain:
 						for outfi in ofrules:
 							filter = "%s %s %s %s -j %s" % (infi, outfi, cr, sr, chain)
 							p.append(filter, loginfo)
-							#filter = "%s %s %s %s" % (infi, outfi, cr, sr)
-							#firewall.append_rule(parent, chain, filter, loginfo=loginfo)
 
-			firewall.chains[chain]=c
+			Firewall.chains[chain]=c
 			return c
 		else:
-			return firewall.chains[chain]
+			return Firewall.chains[chain]
 	get_chain = staticmethod(get_chain)
 
 	def __init__(self, name, loginfo, default="-", table="filter"):

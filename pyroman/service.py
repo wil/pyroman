@@ -17,7 +17,7 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-from pyroman import firewall
+from pyroman import Firewall
 from util import Util
 from port import Port, PortInvalidSpec
 
@@ -39,7 +39,7 @@ class Service:
 		if name == "" or not Util.verify_name(name, servicename=True):
 			raise "service lacking a proper name: '%s' at %s" \
 				% (name, loginfo)
-		if firewall.services.has_key(name):
+		if Firewall.services.has_key(name):
 			raise "Duplicate service specification: '%s' at %s" % (name, loginfo)
 		if sports == "" and dports == "" and include == "" and (name != "ANY"):
 			raise "service specification invalid: '%s' at %s" % (name, loginfo)
@@ -56,7 +56,7 @@ class Service:
 		if include:
 			self.include = Util.splitter.split(include)
 		# register with firewall object
-		firewall.services[name] = self
+		Firewall.services[name] = self
 
 	def get_filter(self, dir):
 		"""
@@ -98,7 +98,7 @@ class Service:
 		Prepare for generation run by looking up includes
 		"""
 		# look up includes, was verified in verify run
-		self.include = map( lambda s: firewall.services[s], self.include )
+		self.include = map( lambda s: Firewall.services[s], self.include )
 	
 	def verify(self):
 		"""
@@ -106,6 +106,6 @@ class Service:
 		defined. Future versions might want to add a loop detection.
 		"""
 		for i in self.include:
-			if not i == "" and not firewall.services.has_key(i):
+			if not i == "" and not Firewall.services.has_key(i):
 				raise "Service '%s' tries to include undefined '%s' at %s" \
 					% (self.name, i, self.loginfo)

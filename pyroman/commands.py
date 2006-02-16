@@ -17,10 +17,9 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-from pyroman import firewall
+from pyroman import Firewall
 from util import Util
 from chain import Chain
-import config
 import port, service, interface, host, nat, rule
 
 def add_service(name, sports="", dports="", include=None):
@@ -89,7 +88,7 @@ def add_nat(client="", server=None, ip=None, port=None, dport=None, dir="in"):
 	# special case: "out" NAT type
 	if dir=="out":
 		(client, server) = (server, client)
-	firewall.nats.append(nat.Nat(client, server, ip, port, dport, dir, loginfo))
+	Firewall.nats.append(nat.Nat(client, server, ip, port, dport, dir, loginfo))
 
 def add_rule(target, server="", client="", service=""):
 	"""
@@ -108,7 +107,7 @@ def add_rule(target, server="", client="", service=""):
 	for srv in Util.splitter.split(server):
 		for cli in Util.splitter.split(client):
 			for svc in Util.splitter.split(service):
-				firewall.rules_todo.append(rule.Rule(target,srv,cli,svc,loginfo))
+				Firewall.rules.append(rule.Rule(target,srv,cli,svc,loginfo))
 	
 def add_chain(name, default="-", table="filter", id=None):
 	"""
@@ -121,49 +120,49 @@ def add_chain(name, default="-", table="filter", id=None):
 	"""
 	if not id:
 		id = name
-	assert(not firewall.chains.has_key(id))
+	assert(not Firewall.chains.has_key(id))
 	loginfo = "Chain %s created by %s" % (name, Util.get_callee(3))
-	firewall.chains[id] = Chain(name, loginfo, default=default, table=table)
+	Firewall.chains[id] = Chain(name, loginfo, default=default, table=table)
 
 def allow(server="", client="", service=""):
 	"""
 	Add an 'allow' rule to the list of rules.
-	This calls add_rule(config.accept, ...)
+	This calls add_rule(Firewall.accept, ...)
 
 	server -- server host nickname
 	client -- client host nickname
 	service -- service this rule applies to
 	"""
-	add_rule(config.accept, server, client, service)
+	add_rule(Firewall.accept, server, client, service)
 	
 def reject(server="", client="", service=""):
 	"""
 	Add a 'reject' rule to the list of rules
-	This calls add_rule(config.reject, ...)
+	This calls add_rule(Firewall.reject, ...)
 
 	server -- server host nickname
 	client -- client host nickname
 	service -- service this rule applies to
 	"""
-	add_rule(config.reject, server, client, service)
+	add_rule(Firewall.reject, server, client, service)
 	
 def drop(server="", client="", service=""):
 	"""
 	Add a 'drop' rule to the list of rules
-	This calls add_rule(config.drop, ...)
+	This calls add_rule(Firewall.drop, ...)
 
 	server -- server host nickname
 	client -- client host nickname
 	service -- service this rule applies to
 	"""
-	add_rule(config.drop, server, client, service)
+	add_rule(Firewall.drop, server, client, service)
 
 def iptables(chain, filter):
-	assert(firewall.chains.has_key(chain))
+	assert(Firewall.chains.has_key(chain))
 	loginfo = Util.get_callee(3)
-	firewall.chains[chain].append(filter, loginfo)
+	Firewall.chains[chain].append(filter, loginfo)
 
 def iptables_end(chain, filter):
-	assert(firewall.chains.has_key(chain))
+	assert(Firewall.chains.has_key(chain))
 	loginfo = Util.get_callee(3)
-	firewall.chains[chain].append_end(filter, loginfo)
+	Firewall.chains[chain].append_end(filter, loginfo)

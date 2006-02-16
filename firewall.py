@@ -18,12 +18,16 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
+import sys, glob
 
-import glob
 # usercommands, the Firewall class and the firewall object
 # should be available to user rules
-from pyroman.pyroman import Firewall, firewall
+from pyroman.pyroman import Firewall
 from pyroman.commands import *
+
+# When given the "safe" parameter, setup a timeout.
+if len(sys.argv) > 1 and sys.argv[1] == "safe":
+	Firewall.timeout = 30
 
 # load user rules alphabetically
 rfiles = glob.glob("rules/*.py")
@@ -32,10 +36,8 @@ for nam in rfiles:
 	execfile(nam)
 
 # do some consistency checks
-firewall.verify()
+Firewall.verify()
 # generate...
-firewall.generate()
-# dump the rules
-#firewall.print_rules()
-# ... or execute
-firewall.execute_rules()
+Firewall.generate()
+# execute firewall
+Firewall.execute_rules()

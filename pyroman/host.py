@@ -17,7 +17,7 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-from pyroman import firewall
+from pyroman import Firewall
 from util import Util
 
 class Host:
@@ -36,7 +36,7 @@ class Host:
 		if name == "" and not Util.verify_name(name):
 			raise "Host '%s' lacking a valid name at %s" \
 				% (name, iface, loginfo)
-		if firewall.hosts.has_key(name):
+		if Firewall.hosts.has_key(name):
 			raise "Duplicate host specification: '%s' at %s" % (name, loginfo)
 		self.name = name
 		# verify and store IPs
@@ -58,7 +58,7 @@ class Host:
 		# store loginfo
 		self.loginfo = loginfo
 		# register with firewall
-		firewall.hosts[name] = self
+		Firewall.hosts[name] = self
 
 	def get_filter(self, dir):
 		"""
@@ -82,7 +82,7 @@ class Host:
 		Check if the host is localhost by comparing the hostname given to the
 		hostname of the current machine
 		"""
-		return self.hostname == firewall.hostname
+		return self.hostname == Firewall.hostname
 
 	def prepare(self):
 		"""
@@ -90,13 +90,13 @@ class Host:
 		"""
 		# lookup interface
 		# this was verified in the verify run already
-		self.iface = firewall.interfaces[self.iface]
+		self.iface = Firewall.interfaces[self.iface]
 
 	def verify(self):
 		"""
 		Verify that the host is properly specified.
 		Verifies that the interface given was properly defined.
 		"""
-		if not firewall.interfaces.has_key(self.iface):
+		if not Firewall.interfaces.has_key(self.iface):
 			raise "Host '%s' is assigned interface '%s' which is not defined at %s" \
 				% (self.name, self.iface, self.loginfo)

@@ -8,10 +8,10 @@ The (small) benefits of using this approach is that you can easily disable
 the rules (by modifying do_drop and do_reject) without reloading your firewall
 and that you get complete traffic counters in these chains.
 """
-add_chain("do_accept")
-iptables("do_accept", "-j ACCEPT")
-add_chain("do_drop")
-iptables("do_drop", "-j DROP")
-add_chain("do_reject")
-iptables("do_reject", "-p tcp -j REJECT --reject-with tcp-reset")
-iptables("do_reject", "-j REJECT --reject-with icmp-port-unreachable")
+add_chain(Firewall.accept)
+iptables(Firewall.accept, "-j ACCEPT")
+add_chain(Firewall.drop)
+iptables(Firewall.drop, "-j DROP")
+add_chain(Firewall.reject)
+iptables(Firewall.reject, "-p tcp -j REJECT --reject-with tcp-reset")
+iptables(Firewall.reject, "-j REJECT --reject-with icmp-port-unreachable")
