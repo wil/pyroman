@@ -1,0 +1,69 @@
+.TH PYROMAN 8
+.SH NAME
+pyroman \- a firewall configuration utility
+.SH SYNOPSIS
+.B pyroman
+.IR safe
+.SH DESCRIPTION
+.B pyroman
+is a firewall configuration utility.
+.PP
+It will compile a set of configuration files to iptables statements to
+setup IP packet filtering for you.
+.PP
+While it is not necessary for operating and using Pyroman, you should
+have understood how IP, TCP, UDP, ICMP and the other commonly used
+Internet protocols work and interact. You should also have understood the
+basics of iptables in order to make use of the full functionality.
+.PP
+.B pyroman
+does not try to hide all the iptables complexity from you, but tries to
+provide you with a convenient way of managing a complex networks firewall.
+For this it offers a compact syntax to add new firewall rules, while still
+exposing access to add arbitrary iptables rules.
+.SH OPTIONS
+.TP
+.BR safe
+When run in safe mode, pyroman will ask you to confirm that the new firewall
+setup is working. Usually this means verifying that your network connection
+is still okay, so you could undo changes when necessary.
+For this, pyroman will ask you to type "OK" and press enter, if this does
+not happen within 30 seconds, it will restore the previous iptables state.
+.SH CONFIGURATION
+Configuration of pyroman consists of a number of files in the directory
+.IR /etc/pyroman .
+These files are in python syntax, although you do not need to be a python
+programmer to use these rules. There is only a small number of statements
+you need to know:
+.TP
+.B add_host
+Define a new host or network
+.TP
+.B add_interface
+Define a new interface (group)
+.TP
+.B add_service
+Add a new service alias (note that you can always use
+e.g. www/tcp to reference the www tcp service as defined in /etc/services)
+.TP
+.B add_nat
+Define a new NAT (Network Address Translation) rule
+.TP
+.B allow
+Allow a service, client, server combination
+.TP
+.B reject
+Reject access for this service, client, server combination
+.TP
+.B drop
+Drop packets for this service, client, server combination
+.TP
+Detailed parameters for these functions can be looked up by caling
+.nf
+cd /usr/share/pyroman
+pydoc ./commands.py
+.fi
+.SH SEE ALSO
+You may want to study the
+.I iptables
+manpage and documentation.
