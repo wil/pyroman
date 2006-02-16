@@ -17,14 +17,20 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-import re, socket, inspect, sys
+import sys, socket, signal, re
 import config
 from util import Util
-from popen2 import popen3, Popen4
-from select import select
+from iptables import Iptables
 
 class Firewall:
 	hostname = socket.gethostname()
+	timeout = 30
+
+	class Error(Exception):
+		"""
+		Basic Exception class
+		"""
+		pass
 
 	def __init__(self):
 		"""
@@ -154,63 +160,96 @@ class Firewall:
 		rr.close()
 		return (ipr.wait() == 0)
 
+	def rollback(self, savedlines):
+		"""
+		Rollback changes to the firewall, and report rollback success to the user
+		"""
+		# restore old iptables rules
+		restored = Iptables.restore(savedlines)
+		if restored:
+			sys.stderr.write("*"*70+"\n")
+			sys.stderr.write("  FIREWALL ROLLBACK FAILED.\n")
+			sys.stderr.write("*"*70+"\n")
+		else:
+			sys.stderr.write("Firewall initialization failed. Rollback complete.\n")
+
+	def user_confirm_timeout_handler(signum, frame):
+		"""
+		This handler is called when the user does not confirm
+		firewall changes withing the given time limit.
+		The firewall will then be rolled back.
+		"""
+		raise Firewall.Error("Success not confirmed by user")
+	user_confirm_timeout_handler = staticmethod(user_confirm_timeout_handler)
+
 	def execute_rules(self):
 		"""
 		Execute the generated rules
 		"""
 		sys.stderr.write("Saving old firewall...\n")
-		savedlines = self.iptables_save()
+		savedlines = Iptables.save()
 
 		sys.stderr.write("*"*70+"\n")
 		sys.stderr.write("Beginning firewall initialization...\n")
+
+		# prepare firewall rules
+		lines = []
+		# collect tables
+		tables = []
+		for c in self.chains.values():
+			if not c.table in tables:
+				tables.append(c.table)
+		# process tables
+		for t in tables:
+			lines.append( ["*%s" % t, "Table select statement for table %s" % t] )
+			# first create all chains
+			for c in self.chains.values():
+				if c.table == t:
+					lines.append( [c.get_init(), c.loginfo] )
+			# then write rules (which might -j to a table not yet created otherwise)
+			for c in self.chains.values():
+				if c.table == t:
+					for l in c.get_rules():
+						lines.append(l)
+			# commit after each table
+			lines.append(["COMMIT", "Commit statement for table %s" % t ])
+
 		# now try to execute the new rules
 		successful = False
 		try:
-			ipr = Popen4(config.iptablesset)
-			rr, rw = ipr.fromchild, ipr.tochild
+			successful = Iptables.commit(lines)
+			sys.stderr.write("*"*70+"\n")
+			sys.stderr.write("New firewall commited successfully.\n")
+			sys.stderr.write("To accept the new configuration, type 'OK' within %d seconds!\n" % Firewall.timeout)
+			# setup timeout
+			signal.signal(signal.SIGALRM, Firewall.user_confirm_timeout_handler)
+			signal.alarm(Firewall.timeout)
+			# wait for user input
+			input = sys.stdin.readline()
+			# reset alarm handling
+			signal.alarm(0)
+			signal.signal(signal.SIGALRM, signal.SIG_DFL)
 
-			# collect tables
-			tables = []
-			for c in self.chains.values():
-				if not c.table in tables:
-					tables.append(c.table)
-			# process tables
-			for t in tables:
-				rw.write("*%s\n" % t)
-				# first create all tables
-				for c in self.chains.values():
-					if c.table == t:
-						rw.write(c.get_init())
-				# then write rules (which might -j to a table not yet created otherwise)
-				for c in self.chains.values():
-					if c.table == t:
-						for l in c.get_rules():
-							rw.write(l)
-				# commit after each table
-				rw.write("COMMIT\n")
-			rw.close()
-
-			# output any error
-			for line in rr.readlines():
-				sys.stderr.write(line)
-
-			if ipr.wait() != 0:
-				successful = False
-				raise "An error occurred during setting the new firewall"
-			successful = True
-		finally:
-			if not successful:
-				sys.stderr.write("*"*70+"\n")
-				sys.stderr.write("An error occurred. Starting firewall restoration.\n")
-				# restore old iptables rules
-				restored = self.iptables_restore(savedlines)
-				sys.stderr.write("*"*70+"\n")
-				if restored:
-					sys.stderr.write("  FIREWALL ROLLBACK FAILED.\n")
-					sys.stderr.write("*"*70+"\n")
-				else:
-					sys.stderr.write("Firewall initialization failed. Rollback complete.\n")
-					sys.stderr.write("Note that only iptable can be rolled back, not e.g. routing.\n")
-				sys.stderr.write("\nHere is the exception triggered during execution:\n")
+			if not re.search("^(OK|YES)", input, re.I):
+				raise Firewall.Error("Success not confirmed by user")
+		except Iptables.Error, e:
+			sys.stderr.write("*"*70+"\n")
+			sys.stderr.write("An error occurred. Starting firewall restoration.\n")
+			self.rollback(savedlines)
+			# show exception
+			sys.stderr.write("%s\n" % e);
+		except Firewall.Error, e:
+			sys.stderr.write("*"*70+"\n")
+			sys.stderr.write("An error occurred. Starting firewall restoration.\n")
+			self.rollback(savedlines)
+			# show exception
+			sys.stderr.write("%s\n" % e);
+		except:
+			sys.stderr.write("*"*70+"\n")
+			sys.stderr.write("An error occurred. Starting firewall restoration.\n")
+			self.rollback(savedlines)
+			sys.stderr.write("\nHere is the exception triggered during execution:\n")
+			raise
+	
 
 firewall = Firewall()

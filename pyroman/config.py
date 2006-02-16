@@ -21,10 +21,3 @@
 accept = "do_accept"
 drop = "do_drop"
 reject = "do_reject"
-
-# Where system binaries are located
-iptables = "/sbin/iptables"
-iptablessave = "/sbin/iptables-save -c"
-iptablesrestore = "/sbin/iptables-restore -c"
-iptablesset = "/sbin/iptables-restore"
-iproute  = "/sbin/ip"

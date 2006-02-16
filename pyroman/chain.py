@@ -65,7 +65,7 @@ class Chain:
 		chain = Chain.make_chain_name(inface, outface, client, server)
 		if not firewall.chains.has_key(chain):
 			#firewall.rules.append( ("%s -N %s" % (config.iptables, chain), loginfo) )
-			c = Chain(chain)
+			c = Chain(chain, loginfo)
 
 			parent = "FORWARD"
 
@@ -115,15 +115,17 @@ class Chain:
 			return firewall.chains[chain]
 	get_chain = staticmethod(get_chain)
 
-	def __init__(self, name, default="-", table="filter"):
+	def __init__(self, name, loginfo, default="-", table="filter"):
 		"""
 		Create a new chain
 
 		name -- Name for this chain
+		loginfo -- Why the chain was created, for error reporting
 		default -- default target for this chain (for INPUT, OUTPUT, ACCEPT)
 		table -- table this chain resides in
 		"""
 		self.name = name
+		self.loginfo = loginfo
 		self.table = table
 		self.default = default
 		self.rules = []
@@ -151,12 +153,12 @@ class Chain:
 			print "-A %s %s" % (self.name, r[0])
 			
 	def get_init(self):
-		return ":%s %s\n" % (self.name, self.default)
+		return ":%s %s" % (self.name, self.default)
 
 	def get_rules(self):
 		lines = []
 		for r in self.rules:
-			lines.append("-A %s %s\n" % (self.name, r[0]))
+			lines.append(["-A %s %s" % (self.name, r[0]), r[1]])
 		for r in self.rules_end:
-			lines.append("-A %s %s\n" % (self.name, r[0]))
+			lines.append(["-A %s %s" % (self.name, r[0]), r[1]])
 		return lines

@@ -122,7 +122,8 @@ def add_chain(name, default="-", table="filter", id=None):
 	if not id:
 		id = name
 	assert(not firewall.chains.has_key(id))
-	firewall.chains[id] = Chain(name, default=default, table=table)
+	loginfo = "Chain %s created by %s" % (name, Util.get_callee(3))
+	firewall.chains[id] = Chain(name, loginfo, default=default, table=table)
 
 def allow(server="", client="", service=""):
 	"""
