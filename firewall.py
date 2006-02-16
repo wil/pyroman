@@ -18,7 +18,7 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-import sys, glob
+import sys, glob, os
 
 # usercommands, the Firewall class and the firewall object
 # should be available to user rules
@@ -30,7 +30,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "safe":
 	Firewall.timeout = 30
 
 # load user rules alphabetically
-rfiles = glob.glob("rules/*.py")
+rfiles = glob.glob(os.path.join("rules","*.py"))
 rfiles.sort()
 for nam in rfiles:
 	execfile(nam)
