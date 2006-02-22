@@ -1,0 +1,13 @@
+Pyroman "base" configuration files
+
+These are Pyroman example configuration files. Pyroman ships with multiple
+sets of configuration examples. This is the "base" example, which contains
+rules you are unlikely to do without - they setup the framework in which
+Pyroman operates by defining some basic services and such.
+
+Your distribution probably has the configuration examples installed in
+/usr/share/doc/pyroman/examples for your reference.
+
+When you run pyroman with the "base" configuration only, the resulting
+firewall will reject all connections - there are no hosts defined, and 
+now "allow" statements in this setup. So it's up to you to add these!
