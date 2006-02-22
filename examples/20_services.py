@@ -4,9 +4,9 @@ Usually, you could just give the port spec in the allow rules, but sometimes
 it's more convenient to have an alias name, and you can also do grouping here.
 
 Ports can be given with their names (as of /etc/services), with port ranges
-(in iptables syntax, i.e. 12:34) trailed by their protocol
+(in iptables syntax, i.e. 12:34) trailed by their protocol (12:34/tcp)
 """
-### these are very common services
+### these are shorthands for very common services
 # Ping
 add_service("ping", dports="echo-request/icmp")
 # Secure Shell
