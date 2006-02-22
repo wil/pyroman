@@ -7,7 +7,7 @@ But without NAT they would be even more boring. ;-)
 # web server
 add_host(
 	name="web",
-	ip="10.100.1.2",
+	ip="10.0.1.2",
 	iface="dmz"
 )
 # offering, well, web service.

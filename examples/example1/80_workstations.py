@@ -16,10 +16,11 @@ reject(
 	service = "fshare win"
 )
 
-# allow any other surfing
+# allow surfing and all kinds of internet applications
 allow(
 	client = "INT DMZ",
 	server = "ANY"
+	# note: no service restrictions here
 )
 
 # we also need to NAT the hosts in these network

@@ -1,8 +1,10 @@
 """
 NOTE: this rule contains an interface name (ethEXT) hardcoded!
+Replace this with your external interface to apply this rule to incoming
+connections only!
 
 SSH scanners are rather annyoing and may pose a security risk if you are
-unable to enforce a good password policy on all you machines.
+unable to enforce a good password policy on all your machines.
 
 The following rules (with optional logging) will drop incoming SSH
 connections on a per-host basis if they come in too quickly.

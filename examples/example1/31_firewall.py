@@ -3,6 +3,15 @@ This is our firewall host. Since we're going to use this policy on this host,
 make sure the "hostname" propery is set to the value of the "hostname" command
 so pyroman will detect that this is the local host.
 
+When pyroman detects a "localhost", meaning hostname==Firewall.hostname, it
+will put these rules into the "INPUT" and "OUTPUT" instead of the "FORWARD"
+chains, so this is essential!
+
+If you run Pyroman on only one host, it's safe to use Firewall.hostname here
+just like we did with the broadcasts. If you want to use these rules on
+multiple hosts (e.g. a failover firewall), you can setup different
+policies this way but have the identical configuration files on both hosts!
+
 The firewall has three interfaces with different policies and several IPs.
 There are different services running on the different interfaces.
 Alltogether this is the most complex host in our configuration...
@@ -49,7 +58,7 @@ allow(
 	service="http dns ssh ping heartb openvpn"
 )
 
-# allow all outgoing connections
+# allow all outgoing connections by the firewall
 allow(
 	client="firewallI firewallD firewallE"
 )
