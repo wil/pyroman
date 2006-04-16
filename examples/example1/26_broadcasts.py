@@ -44,4 +44,4 @@ add_host(
 allow(server="broadcastI", service="dhcp")
 # allow heartbeat (high-availability/failover) on all interfaces
 # this is crypted, so no need to do any client restirctions
-allow(server="broadcastI broadcastD boardcastE", service="heartb")
+allow(server="broadcastI broadcastD broadcastE", service="heartb")
