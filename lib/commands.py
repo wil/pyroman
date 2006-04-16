@@ -126,7 +126,8 @@ def add_chain(name, default="-", table="filter", id=None):
 	"""
 	if not id:
 		id = name
-	assert(not Firewall.chains.has_key(id))
+	if Firewall.chains.has_key(id):
+		raise "Firewall chain %s defined multiple times at %s" % (id, Util.get_callee(3))
 	loginfo = "Chain %s created by %s" % (name, Util.get_callee(3))
 	Firewall.chains[id] = Chain(name, loginfo, default=default, table=table)
 
@@ -170,8 +171,9 @@ def iptables(chain, filter):
 	chain -- chain to add the rules to
 	filter -- iptables parameters
 	"""
-	assert(Firewall.chains.has_key(chain))
 	loginfo = Util.get_callee(3)
+	if not Firewall.chains.has_key(chain):
+		raise "Firewall chain %s not known (use add_chain!) at %s" % (chain, loginfo)
 	Firewall.chains[chain].append(filter, loginfo)
 
 def iptables_end(chain, filter):
@@ -182,6 +184,7 @@ def iptables_end(chain, filter):
 	chain -- chain to add the rules to
 	filter -- iptables parameters
 	"""
-	assert(Firewall.chains.has_key(chain))
 	loginfo = Util.get_callee(3)
+	if not Firewall.chains.has_key(chain):
+		raise "Firewall chain %s not known (use add_chain!) at %s" % (chain, loginfo)
 	Firewall.chains[chain].append_end(filter, loginfo)
