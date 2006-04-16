@@ -1,3 +1,9 @@
+"""
+Commands to be used in pyroman rules files.
+
+allow, reject, drop are just convenience commands, that can be replaced by
+add_rule(Firewall.allow, ...) etc. but that are easier to read.
+"""
 #Copyright (c) 2006 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy

@@ -19,6 +19,7 @@
 #SOFTWARE.
 import sys, re
 from popen2 import popen3, Popen4
+from util import Util
 
 class Iptables:
 	"""
@@ -28,11 +29,16 @@ class Iptables:
 	iptablessave = "/sbin/iptables-save -c"
 	iptablesrestore = "/sbin/iptables-restore -c"
 	iptablesset = "/sbin/iptables-restore"
+	iptablesversion = "/sbin/iptables --version"
 
 	# match for debugging errors
-	match_errorline = re.compile("^Error occurred at line: ([0-9]+)$")
-	match_errormsg  = re.compile("^iptables-restore(?: v[0-9.]+)?: (?:iptables-restore: )?(.+)$")
-	match_hidemsg   = re.compile("^Try `iptables-restore -h' or 'iptables-restore --help' for more information.$")
+	match_errorline = re.compile(r"^Error occurred at line: ([0-9]+)$")
+	match_errormsg  = re.compile(r"^iptables-restore(?: v[0-9.]+)?: (?:iptables-restore: )?(.+)$")
+	match_hidemsg   = re.compile(r"^Try `iptables-restore -h' or 'iptables-restore --help' for more information.$")
+	match_version   = re.compile(r"^iptables v([0-9]+\.[0-9.]+)$")
+
+	# version number cache
+	_version = None
 
 	# Handled error class
 	class Error(Exception):
@@ -40,6 +46,38 @@ class Iptables:
 		Basic exception class
 		"""
 		pass
+
+	def version(min=None, max=None):
+		"""
+		Return iptables version or test for a minimum and/or maximum version
+
+		min -- minimal iptables version required
+		max -- maximum iptables version required
+		"""
+		if not Iptables._version:
+			# query iptables version
+			ir, iw, ie = popen3(Iptables.iptablesversion)
+			iw.close()
+			result = ir.readlines()
+			ir.close()
+			ie.close()
+			for line in result:
+				m = Iptables.match_version.match(line)
+				if m and m.group(1):
+					Iptables._version = m.group(1)
+					break
+			# still no version number? - raise an exception
+			if not Iptables._version:
+				raise Error("Couldn't get iptables version!")
+		if not min and not max:
+			return Iptables._version
+		if min:
+			if Util.compare_versions(Iptables._version, min) < 0: return False
+		if max:
+			if Util.compare_versions(Iptables._version, max) > 0: return False
+		return True
+
+	version = staticmethod(version)
 
 	def save():
 		"""

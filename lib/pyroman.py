@@ -20,6 +20,7 @@
 import sys, socket, signal, re
 from util import Util
 from iptables import Iptables
+from popen2 import popen3
 
 class Firewall:
 	"""
@@ -55,6 +56,10 @@ class Firewall:
 	chains = {}
 	nats = []
 	rules = []
+
+	# for testing kernel version
+	kernelversioncmd = "/bin/uname -r"
+	_kernelversion = None
 
 	def __init__(self):
 		"""
@@ -95,6 +100,17 @@ class Firewall:
 		for r in Firewall.rules:
 			r.prepare()
 	prepare = staticmethod(prepare)
+
+	def iptables_version(min=None, max=None):
+		"""
+		Return iptables version or test for a minimum and/or maximum version
+
+		min -- minimal iptables version required
+		max -- maximum iptables version required
+		"""
+		return Iptables.version(min=min, max=max)
+	
+	iptables_version = staticmethod(iptables_version)
 
 	def generate():
 		"""
@@ -148,7 +164,7 @@ class Firewall:
 		# process tables
 		for t in tables:
 			# try to provide some useful help info, in case some error occurs
-			lines.append( ["*%s" % t, "Table select statement for table %s" % t] )
+			lines.append( ["*%s" % t, "table select statement for table %s" % t] )
 			# first create all chains
 			for c in Firewall.chains.values():
 				if c.table == t:
@@ -159,7 +175,7 @@ class Firewall:
 					for l in c.get_rules():
 						lines.append(l)
 			# commit after each table, try to make a useful error message possible
-			lines.append(["COMMIT", "Commit statement for table %s" % t ])
+			lines.append(["COMMIT", "commit statement for table %s" % t ])
 
 		# Save old firewall.
 		sys.stderr.write("Saving old firewall...\n")
@@ -203,3 +219,31 @@ class Firewall:
 			raise
 	execute_rules = staticmethod(execute_rules)
 	
+	def kernel_version(min=None, max=None):
+		"""
+		Return kernel version or test for a minimum and/or maximum version
+
+		min -- minimal kernel version required
+		max -- maximum kernel version required
+		"""
+		if not Firewall._kernelversion:
+			# query iptables version
+			ir, iw, ie = popen3(Firewall.kernelversioncmd)
+			iw.close()
+			result = ir.readlines()
+			ir.close()
+			ie.close()
+			Firewall._kernelversion = result[0].strip()
+			# still no version number? - raise an exception
+			if not Firewall._kernelversion:
+				raise Error("Couldn't get kernel version!")
+		if not min and not max:
+			return Firewall._kernelversion
+		if min:
+			if Util.compare_versions(Firewall._kernelversion, min) < 0:
+				return False
+		if max:
+			if Util.compare_versions(Firewall._kernelversion, max) > 0:
+				return False
+		return True
+	kernel_version = staticmethod(kernel_version)

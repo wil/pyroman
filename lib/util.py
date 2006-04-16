@@ -81,3 +81,42 @@ class Util:
 				return True
 		return False
 	verify_name = staticmethod(verify_name)
+
+	def compare_versions(ver1, ver2):
+		"""
+		Compare to version numbers
+		returns True if ver1 is less or equal to ver2
+
+		ver1 -- first version number
+		ver2 -- second version number
+		"""
+		def compsplit(s):
+			"""
+			Split a version number component into a pair of (int,str)
+			"""
+			if not s[0].isdigit():
+				return (None, s)
+			for i in range(1,len(s)):
+				if not s[i].isdigit():
+					return (int(s[:i]),s[i:])
+			return (int(s),"")
+
+		v1c = ver1.split(".")
+		v2c = ver2.split(".")
+		minl = min(len(v1c),len(v2c))
+		for i in range(minl):
+			(v1, v1s) = compsplit(v1c[i])
+			(v2, v2s) = compsplit(v2c[i])
+			# one has digits, one hasn't?
+			if not v1: return -1
+			if not v2: return +1
+			if v1 != v2:
+				assert(cmp(v1,v2) != 0)
+				return cmp(v1, v2)
+			# compare remaining string
+			c = cmp(v1s,v2s)
+			if c != 0: return c
+		if len(v1c) < len(v2c): return -1
+		if len(v1c) > len(v2c): return +1
+		return 0
+	compare_versions = staticmethod(compare_versions)
