@@ -58,6 +58,15 @@ Reject access for this service, client, server combination
 .B drop
 Drop packets for this service, client, server combination
 .TP
+.B add_rule
+Add a rule for this service, client, server and target combination
+.TP
+.B iptables
+Add an arbitrary iptables statement to be executed at beginning
+.TP
+.B iptables_end
+Add an arbitrary iptables statement to be executed at the end
+.TP
 Detailed parameters for these functions can be looked up by caling
 .nf
 cd /usr/share/pyroman
