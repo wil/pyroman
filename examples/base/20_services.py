@@ -21,6 +21,7 @@ add_service("auth", dports="auth/tcp")
 add_service("http", dports="www/tcp")
 add_service("https", dports="https/tcp")
 add_service("http81", dports="81/tcp")
+add_service("www", include="http https")
 # FTP
 add_service("ftp", dports="ftp/tcp")
 # Email protocols
@@ -30,6 +31,7 @@ add_service("pop3", dports="pop3/tcp")
 add_service("pop3s", dports="pop3s/tcp")
 add_service("imap", dports="imap/tcp")
 add_service("imaps", dports="imaps/tcp")
+add_service("mail", include="smtp ssmtp pop3 pop3s imap imaps")
 # LDAP
 add_service("ldap", dports="ldap/tcp")
 # Heartbeat pings
@@ -38,10 +40,8 @@ add_service("heartb", dports="694/udp")
 add_service("openvpn", dports="1194/udp")
 # DHCP
 add_service("dhcp", sports="bootpc/udp", dports="bootps/udp")
-
-# some aliases / groups for convenience
-add_service("www", include="http https")
-add_service("mail", include="smtp ssmtp pop3 pop3s imap imaps")
+# Multicast DNS / Bonjour / Rendevouz / Avahi
+add_service("mdns", sports="5353/udp", dports="5353/udp")
 
 # Windows shares are really annoying
 add_service("win1t", sports="137:139/tcp 445/tcp")
