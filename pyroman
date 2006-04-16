@@ -3,7 +3,7 @@
 # where the pyroman libraries are found - e.g. /usr/share/pyroman
 library_path = "./lib"
 # where the rules are located - e.g. /etc/pyroman
-rules_path = "./examples"
+rules_path = "./examples/base"
 # timeout for the "safe" mode invocation
 safe_timeout = 30
 
