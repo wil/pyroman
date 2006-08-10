@@ -123,37 +123,10 @@ class Firewall:
 			n.generate()
 	generate = staticmethod(generate)
 
-	def rollback(savedlines):
+	def calciptableslines():
 		"""
-		Rollback changes to the firewall, and report rollback success to the user
-
-		savedlines -- saved firewall setting to be restored.
+		Calculate the lines to be passed to iptables
 		"""
-		# restore old iptables rules
-		restored = Iptables.restore(savedlines)
-		if restored:
-			sys.stderr.write("*"*70+"\n")
-			sys.stderr.write("  FIREWALL ROLLBACK FAILED.\n")
-			sys.stderr.write("*"*70+"\n")
-		else:
-			sys.stderr.write("Firewall initialization failed. Rollback complete.\n")
-	rollback = staticmethod(rollback)
-
-
-	def execute_rules():
-		"""
-		Execute the generated rules, rollback on error.
-		If Firewall.timeout is set, give the user some time to accept the
-		new configuration, otherwise roll back automatically.
-		"""
-		def user_confirm_timeout_handler(signum, frame):
-			"""
-			This handler is called when the user does not confirm
-			firewall changes withing the given time limit.
-			The firewall will then be rolled back.
-			"""
-			raise Firewall.Error("Success not confirmed by user")
-
 		# prepare firewall rules
 		lines = []
 		# collect tables
@@ -176,6 +149,51 @@ class Firewall:
 						lines.append(l)
 			# commit after each table, try to make a useful error message possible
 			lines.append(["COMMIT", "commit statement for table %s" % t ])
+		return lines
+	calciptableslines = staticmethod(calciptableslines)
+
+	def rollback(savedlines):
+		"""
+		Rollback changes to the firewall, and report rollback success to the user
+
+		savedlines -- saved firewall setting to be restored.
+		"""
+		# restore old iptables rules
+		restored = Iptables.restore(savedlines)
+		if restored:
+			sys.stderr.write("*"*70+"\n")
+			sys.stderr.write("  FIREWALL ROLLBACK FAILED.\n")
+			sys.stderr.write("*"*70+"\n")
+		else:
+			sys.stderr.write("Firewall initialization failed. Rollback complete.\n")
+	rollback = staticmethod(rollback)
+
+	def print_rules(verbose):
+		"""
+		Print the calculated rules, as they would be passed to iptables.
+		"""
+		for line in Firewall.calciptableslines():
+			if verbose:
+				# print reasoning
+				print "# %s" % line[1]
+			print line[0]
+	print_rules = staticmethod(print_rules)
+
+	def execute_rules():
+		"""
+		Execute the generated rules, rollback on error.
+		If Firewall.timeout is set, give the user some time to accept the
+		new configuration, otherwise roll back automatically.
+		"""
+		def user_confirm_timeout_handler(signum, frame):
+			"""
+			This handler is called when the user does not confirm
+			firewall changes withing the given time limit.
+			The firewall will then be rolled back.
+			"""
+			raise Firewall.Error("Success not confirmed by user")
+
+		lines = Firewall.calciptableslines()
 
 		# Save old firewall.
 		sys.stderr.write("Saving old firewall...\n")

@@ -47,10 +47,14 @@ Usage: pyroman [-hvs] [--help] [--version] [-r rulesdir] [--rules=rulesdir]
 
 def main():
 	rules_path = default_rules_path
+	no_act = False
+	print_only = False
+	verbose_print = False
 	# parse options
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "hvr:t:s", \
-			["help", "version", "rules=", "timeout=", "safe"])
+		opts, args = getopt.getopt(sys.argv[1:], "hvr:t:snpP", \
+			["help", "version", "rules=", "timeout=", "safe", "no-act",
+			 "print", "print-verbose"])
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
@@ -73,6 +77,17 @@ def main():
 		if o in ("-s", "--safe"):
 			if not Firewall.timeout:
 				Firewall.timeout = safe_timeout_default
+		# Don't execute firewall
+		if o in ("-n", "--no-act"):
+			no_act = True
+		# Print resulting firewall only
+		if o in ("-p", "--print"):
+			print_only = True
+			verbose_print = False
+		# Print resulting firewall only
+		if o in ("-P", "--print-verbose"):
+			print_only = True
+			verbose_print = True
 
 	# When given the "safe" parameter, setup a timeout.
 	if len(args) > 0:
@@ -83,9 +98,9 @@ def main():
 			print "Unknown parameter passed."
 			usage()
 			sys.exit(2)
-	run(rules_path)
+	run(rules_path, no_act, print_only, verbose_print)
 
-def run(rules_path):
+def run(rules_path, no_act, print_only, verbose_print):
 	# load user rules alphabetically
 	rfiles = glob.glob(os.path.join(rules_path,"*.py"))
 	if len(rfiles) < 1:
@@ -100,7 +115,12 @@ def run(rules_path):
 	# generate...
 	Firewall.generate()
 	# execute firewall
-	Firewall.execute_rules()
+	if no_act:
+		print "Syntax checks passed, would commit to iptables now."
+	elif print_only:
+		Firewall.print_rules(verbose_print)
+	else:
+		Firewall.execute_rules()
 
 if __name__ == "__main__":
 	main()
