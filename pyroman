@@ -41,7 +41,8 @@ version = "0.4"
 
 def usage():
 	print """\
-Usage: pyroman [-hvs] [--help] [--version] [-r rulesdir] [--rules=rulesdir]
+Usage: pyroman [-hVnspP] [--help] [--version] [--no-act]
+       [-r rulesdir] [--rules=rulesdir] [--print] [--print-verbose]
        [-t seconds] [--timeout=seconds] [--safe] [safe]\
 """
 
@@ -52,7 +53,7 @@ def main():
 	verbose_print = False
 	# parse options
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "hvr:t:snpP", \
+		opts, args = getopt.getopt(sys.argv[1:], "hVr:t:snpP", \
 			["help", "version", "rules=", "timeout=", "safe", "no-act",
 			 "print", "print-verbose"])
 	except getopt.GetoptError:
@@ -65,8 +66,9 @@ def main():
 			usage()
 			sys.exit()
 		# print version number
-		if o in ("-v", "--version"):
+		if o in ("-V", "--version"):
 			print "Pyroman version %s" % version
+			sys.exit()
 		# Use different directory for rules
 		if o in ("-r", "--rules"):
 			rules_path = a

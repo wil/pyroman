@@ -2,8 +2,41 @@
 .SH NAME
 pyroman \- a firewall configuration utility
 .SH SYNOPSIS
+.hy 0
+.na
+.TP
 .B pyroman
-.IR safe
+[
+.B \-hvnspP
+] [
+.BI \-r " RULESDIR" 
+] [
+.BI \-t " SECONDS" 
+]
+.br
+[
+.B \-\-help
+] [
+.B \-\-version
+] [
+.B \-\-safe
+] [
+.B \-\-no\-act
+]
+.br
+[
+.B \-\-print
+] [
+.B \-\-print-verbose
+] [
+.BI \-\-rules= "RULESDIR"
+]
+.br
+[
+.BI \-\-timeout= "SECONDS"
+] [
+.B safe
+]
 .SH DESCRIPTION
 .B pyroman
 is a firewall configuration utility.
@@ -22,13 +55,56 @@ provide you with a convenient way of managing a complex networks firewall.
 For this it offers a compact syntax to add new firewall rules, while still
 exposing access to add arbitrary iptables rules.
 .SH OPTIONS
+.PD 0
 .TP
-.BR safe
-When run in safe mode, pyroman will ask you to confirm that the new firewall
-setup is working. Usually this means verifying that your network connection
-is still okay, so you could undo changes when necessary.
-For this, pyroman will ask you to type "OK" and press enter, if this does
-not happen within 30 seconds, it will restore the previous iptables state.
+.BI \-r " RULESDIR," \-\-rules= "RULES "
+Load the rules from directory
+.I RULESDIR 
+instead of the default directory (usually
+.B /etc/pyroman
+)
+.TP
+.BI \-t " SECONDS," \-\-timeout= "SECONDS "
+Wait
+.I SECONDS 
+seconds after applying the changes for the user to type
+.B OK 
+to confirm he can still access the firewall. This implies
+.I \-\-safe 
+but allows you to use a different timeout.
+.TP
+.BR \-h ", " \-\-help
+Print a summary of the command line options and exit.
+.TP
+.BR \-V ", " \-\-version
+Print the version number of
+.B pyroman
+and exit.
+.TP
+.BR \-s ", " \-\-safe ", " safe
+When the firewall was committed, wait 30 seconds for the user to type
+.B OK
+to confirm, that he can still access the firewall (i.e. the network
+connection wasn't blocked by the firewall). 
+Otherwise, the firewall changes will be undone, and the firewall will be
+restored to the previous state. 
+Use the
+.BI \-\-timeout= "SECONDS"
+option to change the timeout.
+.TP
+.BR \-n ", " \-\-no\-act
+Don't actually run iptables. This can be used to check if
+.B pyroman
+accepts the configuration files.
+.TP
+.BR \-p ", " \-\-print
+Instead of running iptables, output the generated rules.
+.TP
+.BR \-P ", " \-\-print-verbose
+Instead of running iptables, output the generated rules. Each statement
+will have one comment line explaining how this rules was generated. This
+will usually include the filename and line number, and is useful for
+debugging.
 .SH CONFIGURATION
 Configuration of pyroman consists of a number of files in the directory
 .IR /etc/pyroman .
@@ -72,7 +148,15 @@ Detailed parameters for these functions can be looked up by caling
 cd /usr/share/pyroman
 pydoc ./commands.py
 .fi
+
+.SH BUGS
+None known as of pyroman-0.4 release
+
+.SH AUTHOR
+.B pyroman
+was written by Erich Schubert <erich@debian.org>
+
 .SH SEE ALSO
-You may want to study the
-.I iptables
-manpage and documentation.
+.BR iptables (8),
+.BR iptables-restore (8)
+.BR iptables-load (8)
