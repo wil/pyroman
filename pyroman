@@ -3,9 +3,9 @@
 # where the pyroman libraries are found - e.g. /usr/share/pyroman
 library_path = "./lib"
 # where the rules are located - e.g. /etc/pyroman
-rules_path = "./examples/base"
+default_rules_path = "./examples/base"
 # timeout for the "safe" mode invocation
-safe_timeout = 30
+safe_timeout_default = 30
 
 #Copyright (c) 2006 Erich Schubert erich@debian.org
 
@@ -26,7 +26,7 @@ safe_timeout = 30
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-import sys, glob, os
+import sys, glob, os, getopt
 
 # path to the main pyroman code
 sys.path.insert(0, library_path)
@@ -36,19 +36,71 @@ sys.path.insert(0, library_path)
 from pyroman import Firewall
 from commands import *
 
-# When given the "safe" parameter, setup a timeout.
-if len(sys.argv) > 1 and sys.argv[1] == "safe":
-	Firewall.timeout = safe_timeout
+# Pyroman version
+version = "0.4"
 
-# load user rules alphabetically
-rfiles = glob.glob(os.path.join(rules_path,"*.py"))
-rfiles.sort()
-for nam in rfiles:
-	execfile(nam)
+def usage():
+	print """\
+Usage: pyroman [-hvs] [--help] [--version] [-r rulesdir] [--rules=rulesdir]
+       [-t seconds] [--timeout=seconds] [--safe] [safe]\
+"""
 
-# do some consistency checks
-Firewall.verify()
-# generate...
-Firewall.generate()
-# execute firewall
-Firewall.execute_rules()
+def main():
+	rules_path = default_rules_path
+	# parse options
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "hvr:t:s", \
+			["help", "version", "rules=", "timeout=", "safe"])
+	except getopt.GetoptError:
+		usage()
+		sys.exit(2)
+
+	for o, a in opts:
+		# help screen
+		if o in ("-h", "--help"):
+			usage()
+			sys.exit()
+		# print version number
+		if o in ("-v", "--version"):
+			print "Pyroman version %s" % version
+		# Use different directory for rules
+		if o in ("-r", "--rules"):
+			rules_path = a
+		# Setup timeout, implies -s
+		if o in ("-t", "--timeout"):
+			Firewall.timeout = int(a)
+		# When given the "safe" parameter, setup a timeout.
+		if o in ("-s", "--safe"):
+			if not Firewall.timeout:
+				Firewall.timeout = safe_timeout_default
+
+	# When given the "safe" parameter, setup a timeout.
+	if len(args) > 0:
+		if len(args) == 1 and args[0] == "safe":
+			if not Firewall.timeout:
+				Firewall.timeout = safe_timeout_default
+		else:
+			print "Unknown parameter passed."
+			usage()
+			sys.exit(2)
+	run(rules_path)
+
+def run(rules_path):
+	# load user rules alphabetically
+	rfiles = glob.glob(os.path.join(rules_path,"*.py"))
+	if len(rfiles) < 1:
+		print "No rule files found in directory '%s'!" % rules_path
+		sys.exit(1)
+	rfiles.sort()
+	for nam in rfiles:
+		execfile(nam)
+
+	# do some consistency checks
+	Firewall.verify()
+	# generate...
+	Firewall.generate()
+	# execute firewall
+	Firewall.execute_rules()
+
+if __name__ == "__main__":
+	main()
