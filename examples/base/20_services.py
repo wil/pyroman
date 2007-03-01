@@ -49,3 +49,6 @@ add_service("win2t", dports="137:139/tcp 445/tcp")
 add_service("win1u", sports="137:139/udp 445/udp")
 add_service("win2u", dports="137:139/udp 445/udp")
 add_service("win", include="win1t win2t win1u win2u")
+
+# unprivileged ports
+add_service("unprivileged", dports="1024:65535/tcp 1024:65535/udp")
