@@ -63,7 +63,7 @@ class Interface:
 		# when necessary, turn around filter directions
 		result = []
 		for i in self.iface:
-			if i != "":
+			if i != "" and i != "*":
 				result.append( "-%s %s" % (idir, i) )
 		return result
 
