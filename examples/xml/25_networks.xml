@@ -1,3 +1,6 @@
 <pyroman>
+  <!-- a very basic network definition -->
+  <!-- name again is arbitrary, but used for chain name generation and thus
+  must not be too long or contain non-alphanumeric chars. -->
   <host name="ANY" ip="0.0.0.0/0" iface="any" />
 </pyroman>

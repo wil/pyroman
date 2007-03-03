@@ -1,4 +1,8 @@
 <pyroman>
+  <!-- these rules are standard connection tracking handling: we allow any
+  established connection to persist and related connections to go through. -->
+  <!-- again we're using magic values *accept* here for the Firewall.accept
+  variables, so we can use the easier to read allow/drop/reject statements -->
   <iptables chain="INPUT" filter="-m state --state ESTABLISHED,RELATED -j *accept*" />
   <iptables chain="INPUT" filter="-m state --state INVALID -j *drop*" />
   <iptables chain="OUTPUT" filter="-m state --state ESTABLISHED,RELATED -j *accept*" />

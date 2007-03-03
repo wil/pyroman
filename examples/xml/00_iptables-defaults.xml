@@ -1,10 +1,15 @@
 <pyroman>
+  <!-- these define the iptables built-in chains
+       so you'll very likely want to keep this file -->
+  <!-- if you want to change the default actions, you can do that here. -->
   <chain name="INPUT" default="DROP" />
   <chain name="OUTPUT" default="DROP" />
   <chain name="FORWARD" default="DROP" />
+  <!-- NAT table, for network address translation -->
   <chain name="OUTPUT" id="natOUT" default="ACCEPT" table="nat" />
   <chain name="PREROUTING" id="natPRE" default="ACCEPT" table="nat" />
   <chain name="POSTROUTING" id="natPOST" default="ACCEPT" table="nat" />
+  <!-- MANGLE table, for packet tweaking -->
   <chain name="INPUT" id="manIN" default="ACCEPT" table="mangle" />
   <chain name="OUTPUT" id="manOUT" default="ACCEPT" table="mangle" />
   <chain name="FORWARD" id="manFWD" default="ACCEPT" table="mangle" />

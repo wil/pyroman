@@ -1,4 +1,6 @@
 <pyroman>
+  <!-- these rules - which are raw iptables rules - disable the firewall on
+       the loopback interface. You'll probably want to keep that this way. -->
   <iptables chain="INPUT" filter="-i lo -j ACCEPT" />
   <iptables chain="OUTPUT" filter="-o lo -j ACCEPT" />
 </pyroman>

@@ -1,13 +1,19 @@
 <pyroman>
+  <!-- some assorted services with their nicknames, so they can be referred to
+  easier. 'ping' is just much nicer than 'echo-request/icmp'. -->
+  <!-- also some service definitions are groups, e.g. www = http+https -->
+  <!-- very common services -->
   <service name="ping" dports="echo-request/icmp" />
   <service name="ssh" dports="ssh/tcp" />
   <service name="dns" dports="domain/udp" />
   <service name="ntp" dports="ntp/udp" />
-  <service name="auth" dports="auth/tcp" />
+  <service name="dhcp" sports="bootpc/udp" dports="bootps/udp" />
+  <!-- web services -->
   <service name="http" dports="www/tcp" />
   <service name="https" dports="https/tcp" />
   <service name="www" include="http https" />
   <service name="ftp" dports="ftp/tcp" />
+  <!-- mail services -->
   <service name="smtp" dports="smtp/tcp" />
   <service name="ssmtp" dports="ssmtp/tcp" />
   <service name="pop3" dports="pop3/tcp" />
@@ -15,15 +21,18 @@
   <service name="imap" dports="imap/tcp" />
   <service name="imaps" dports="imaps/tcp" />
   <service name="mail" include="smtp ssmtp pop3 pop3s imap imaps" />
+  <!-- some less common services -->
+  <service name="auth" dports="auth/tcp" />
   <service name="ldap" dports="ldap/tcp" />
   <service name="heartb" dports="694/udp" />
   <service name="openvpn" dports="1194/udp" />
-  <service name="dhcp" sports="bootpc/udp" dports="bootps/udp" />
   <service name="mdns" dports="5353/udp" />
+  <!-- windows services, since you might want to filter these on a firewall -->
   <service name="win1t" sports="137:139/tcp 445/tcp" />
   <service name="win2t" dports="137:139/tcp 445/tcp" />
   <service name="win1u" sports="137:139/udp 445/udp" />
   <service name="win2u" dports="137:139/udp 445/udp" />
   <service name="win" include="win1t win2t win1u win2u" />
+  <!-- 'unprivileged' ports, that usually can be used by any user -->
   <service name="unprivileged" dports="1024:65535/tcp 1024:65535/udp" />
 </pyroman>

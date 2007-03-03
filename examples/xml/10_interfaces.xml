@@ -1,3 +1,8 @@
 <pyroman>
+  <!-- the most basic interface specification: any interface -->
+  <!-- the name is used for generating chain names (so don't make it too long,
+  and use only ascii characters. -->
+  <!-- the iface attribute is the kernel interfaces this maps to; a '*'
+  obviously is all interfaces. Statements such as 'eth* ppp*' are okay. -->
   <interface name="any" iface="*" />
 </pyroman>

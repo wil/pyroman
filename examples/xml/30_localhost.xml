@@ -1,6 +1,18 @@
 <pyroman>
+  <!-- rules for firewalling the firewall host itself. -->
+  <!-- the hostname '*localhost*' is special: it will always be the current
+  hosts hostname. This is important if you want to share configuration files
+  over multiple hosts: if the value of the hostname attribute matches the
+  machines hostname, these rules end up in the OUTPUT and INPUT chains of
+  iptables; otherwise they are put into the FORWARD chains. -->
   <host name="localhost" hostname="*localhost*" ip="0.0.0.0/0" iface="any" />
+  <!-- no restriction on outgoing connections -->
   <allow client="localhost" server="ANY" />
+  <!-- allow incoming connections to a few services -->
   <allow client="ANY" server="localhost" service="ssh mdns www ping" />
+  <!-- to deny access to some service, use e.g.
+  <reject server="localhost" service="8080/tcp" />
+  -->
+  <!-- allow incoming connections to unprivileged ports -->
   <allow client="ANY" server="localhost" service="unprivileged" />
 </pyroman>

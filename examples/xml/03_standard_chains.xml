@@ -1,8 +1,14 @@
 <pyroman>
-  <!-- the *accept* value is magic for Firewall.accept -->
+  <!-- pyroman has three 'built in' chains that are being used if you use
+  the 'allow', 'drop' or 'reject' statements. 'allow' and 'drop' could be
+  hardwired to the ACCEPT, DROP and REJECT iptables actions, however these two
+  chains can still be useful for statistics. -->
+  <!-- The 'reject' chain defined here has a more verbose reject on TCP
+  connection attempts that plays more nicely with some services -->
+  <!-- the '*accept*' value is magic for the variable Firewall.accept -->
   <chain name="*accept*" />
   <iptables chain="*accept*" filter="-j ACCEPT" />
-  <!-- for just discarding packets -->
+  <!-- for just discarding packets, again magic Firewall.drop -->
   <chain name="*drop*" />
   <iptables chain="*drop*" filter="-j DROP" />
   <!-- rules for doing a pretty 'reject' (i.e. connection refused) -->

@@ -1,5 +1,8 @@
 <pyroman>
-  <iptables chain="INPUT" filter="-p icmp --icmp-type router-advertisement -j DROP" />
+  <!-- these rules handle some common ICMP messages you'll likely want to
+  accept. These ICMP messages are generated on connection errors, and disabling
+  them can cause connections to timeout that would otherwise be quickly reported
+  as unreachable. -->
   <iptables chain="INPUT" filter="-p icmp --icmp-type destination-unreachable -j ACCEPT" />
   <iptables chain="INPUT" filter="-p icmp --icmp-type time-exceeded -j ACCEPT" />
   <iptables chain="OUTPUT" filter="-p icmp --icmp-type destination-unreachable -j ACCEPT" />
