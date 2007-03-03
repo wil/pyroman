@@ -52,6 +52,8 @@ class XMLSyntax:
 			XMLSyntax.processServiceNode(node, filename)
 		elif node.nodeName == "chain":
 			XMLSyntax.processChainNode(node, filename)
+		elif node.nodeName == "nat":
+			XMLSyntax.processNatNode(node, filename)
 		elif node.nodeName == "allow" \
 		or node.nodeName == "drop" \
 		or node.nodeName == "reject" \
@@ -165,7 +167,7 @@ class XMLSyntax:
 	@staticmethod
 	def processRuleNode(node, filename=None):
 		"""
-		Process a node corresponding to an allow/drop/reject rule
+		Process a node corresponding to an allow/drop/reject or add_rule rule
 		"""
 		target=None
 		server=""
@@ -195,3 +197,34 @@ class XMLSyntax:
 			for cli in Util.splitter.split(client):
 				for svc in Util.splitter.split(service):
 					Firewall.rules.append(rule.Rule(target,srv,cli,svc,filename))
+
+	@staticmethod
+	def processNatNode(node, filename=None):
+		"""
+		Process a node corresponding to an add_nat statement
+		"""
+		client=""
+		server=None
+		ip=None
+		port=None
+		dport=None
+		dir="in"
+		if node.hasAttribute("client"):
+			client = node.getAttribute("client")
+		if node.hasAttribute("server"):
+			server = node.getAttribute("server")
+		if node.hasAttribute("ip"):
+			ip = node.getAttribute("ip")
+		if node.hasAttribute("port"):
+			port = node.getAttribute("port")
+		if node.hasAttribute("dport"):
+			dport = node.getAttribute("dport")
+		if node.hasAttribute("dir"):
+			dir = node.getAttribute("dir")
+
+		if not server or not ip:
+			raise PyromanException("Server not specified for NAT at %s" % filename)
+
+		if (dir == "out"):
+			(client, server) = (server, client)
+		Firewall.nats.append(nat.Nat(client, server, ip, port, dport, dir, filename))
