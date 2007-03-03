@@ -18,4 +18,16 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 
-# Not much to init here.
+class PyromanException(Exception):
+	"""
+	Representation of a Pyroman exception
+	"""
+	def __init__(self, message):
+		"""
+		Just inherit everything.
+		"""
+		Exception(self, message)
+		self.message = message
+
+	def __str__(self):
+		return self.message

@@ -1,0 +1,6 @@
+<pyroman>
+  <iptables chain="manPRE" filter="-p tcp --tcp-flags ALL FIN,URG,PSH -j *drop*" />
+  <iptables chain="manPRE" filter="-p tcp --tcp-flags ALL NONE -j *drop*" />
+  <iptables chain="manPRE" filter="-p tcp --tcp-flags SYN,RST SYN,RST -j *drop*" />
+  <iptables chain="manPRE" filter="-p tcp --tcp-flags SYN,FIN SYN,FIN -j *drop*" />
+</pyroman>

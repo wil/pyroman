@@ -1,4 +1,4 @@
-#Copyright (c) 2006 Erich Schubert erich@debian.org
+#Copyright (c) 2007 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@ from pyroman import Firewall
 from util import Util
 from port import Port
 from chain import Chain
+from exception import PyromanException
 
 class Nat:
 	"""
@@ -44,31 +45,31 @@ class Nat:
 		web server via a NAT)
 		"""
 		if server == "":
-			raise "Nat lacking a server host (client: %s, server: %s, ip: %s) at %s" % (client, server, ip, loginfo)
+			raise PyromanException("Nat lacking a server host (client: %s, server: %s, ip: %s) at %s" % (client, server, ip, loginfo))
 		if ip == "":
-			raise "Nat lacking IP address: (client: %s, server: %s) at %s" % (client, server, loginfo)
+			raise PyromanException("Nat lacking IP address: (client: %s, server: %s) at %s" % (client, server, loginfo))
 		if dir not in ["in", "out", "both"]:
-			raise "Nat with invalid direction: (client: %s, server: %s, ip: %s, dir: %s) at %s" % (client, server, ip, dir, loginfo)
+			raise PyromanException("Nat with invalid direction: (client: %s, server: %s, ip: %s, dir: %s) at %s" % (client, server, ip, dir, loginfo))
 		if not Util.verify_ip(ip,nonet=True):
-			raise "Nat with invalid IP address: (client: %s, server: %s, ip: %s) at %s" % (client, server, ip, loginfo)
+			raise PyromanException("Nat with invalid IP address: (client: %s, server: %s, ip: %s) at %s" % (client, server, ip, loginfo))
 		if port:
 			try:
 				self.port = Port(port)
 			except PortInvalidSpec:
-				raise "Nat port specification invalid: (client: %s, server: %s, ip: %s, port: %s) at %s " % (client, server, ip, port, loginfo)
+				raise PyromanException("Nat port specification invalid: (client: %s, server: %s, ip: %s, port: %s) at %s " % (client, server, ip, port, loginfo))
 		else:
 			self.port = None
 		if dport:
 			try:
 				self.dport = Port(dport)
 			except PortInvalidSpec:
-				raise "Nat dport specification invalid: (client: %s, server: %s, ip: %s, port: %s, dport: %s) at %s " % (client, server, ip, port, dport, loginfo)
+				raise PyromanException("Nat dport specification invalid: (client: %s, server: %s, ip: %s, port: %s, dport: %s) at %s " % (client, server, ip, port, dport, loginfo))
 		else:
 			self.dport = None
 		if self.dport and not (self.port.proto == self.dport.proto):
-			raise "Nat ports have different protocols: (client: %s, server: %s, ip: %s, port: %s, dport: %s) at %s" % (client, server, ip, port, dport, loginfo)
+			raise PyromanException("Nat ports have different protocols: (client: %s, server: %s, ip: %s, port: %s, dport: %s) at %s" % (client, server, ip, port, dport, loginfo))
 		if dport and not port:
-			raise "Nat with destination port, but no source port: (client: %s, server: %s, ip: %s, dport: %s) at %s" % (client, server, ip, dport, loginfo)
+			raise PyromanException("Nat with destination port, but no source port: (client: %s, server: %s, ip: %s, dport: %s) at %s" % (client, server, ip, dport, loginfo))
 		self.client = Util.splitter.split(client)
 		self.server = Util.splitter.split(server)
 		self.ip = ip
@@ -120,9 +121,9 @@ class Nat:
 				server = Firewall.hosts[s]
 				# sanity checks, that should be moved to "verify"
 				if not client or not server:
-					raise "Client or server not found for NAT defined at %s" % self.loginfo
+					raise PyromanException("Client or server not found for NAT defined at %s" % self.loginfo)
 				if client.iface == server.iface:
-					raise "client interface and server interface match (i.e. cannot NAT!) for NAT defined at %s" % self.loginfo
+					raise PyromanException("client interface and server interface match (i.e. cannot NAT!) for NAT defined at %s" % self.loginfo)
 
 				if self.dir in ["in", "both"]:
 					self.gen_dnat(client, server)

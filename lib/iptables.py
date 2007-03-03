@@ -1,4 +1,4 @@
-#Copyright (c) 2006 Erich Schubert erich@debian.org
+#Copyright (c) 2007 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,7 @@
 import sys, re
 from popen2 import popen3, Popen4
 from util import Util
+from exception import PyromanException
 
 class Iptables:
 	"""
@@ -66,9 +67,9 @@ class Iptables:
 				if m and m.group(1):
 					Iptables._version = m.group(1)
 					break
-			# still no version number? - raise an exception
+			# still no version number? - raise PyromanException(an exception)
 			if not Iptables._version:
-				raise Error("Couldn't get iptables version!")
+				raise PyromanException(Error("Couldn't get iptables version!"))
 		if not min and not max:
 			return Iptables._version
 		if min:
@@ -159,8 +160,8 @@ class Iptables:
 		success = (ipr.wait() == 0)
 		if not success:
 			if errormsg:
-				raise Iptables.Error("Firewall commit failed: %s, caused by %s" % (errormsg[0], errormsg[1]))
+				raise PyromanException(Iptables.Error("Firewall commit failed: %s, caused by %s" % (errormsg[0], errormsg[1])))
 			else:
-				raise Iptables.Error("Firewall commit failed due to unknown error.")
+				raise PyromanException(Iptables.Error("Firewall commit failed due to unknown error."))
 		return success
 	commit = staticmethod(commit)

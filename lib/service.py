@@ -1,4 +1,4 @@
-#Copyright (c) 2006 Erich Schubert erich@debian.org
+#Copyright (c) 2007 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,7 @@
 from pyroman import Firewall
 from util import Util
 from port import Port, PortInvalidSpec
+from exception import PyromanException
 
 class Service:
 	"""
@@ -27,7 +28,7 @@ class Service:
 	by including other services, any restriction on source-destination
 	port combinations is possible, also with different protocols.
 	"""
-	def __init__(self, name, sports, dports, include, loginfo):
+	def __init__(self, name, sports="", dports="", include="", loginfo=""):
 		"""
 		Create new service object with string parameters
 
@@ -37,20 +38,20 @@ class Service:
 		loginfo -- reference line number for user error messages
 		"""
 		if name == "" or not Util.verify_name(name, servicename=True):
-			raise "service lacking a proper name: '%s' at %s" \
-				% (name, loginfo)
+			raise PyromanException("service lacking a proper name: '%s' at %s" \
+				% (name, loginfo))
 		if Firewall.services.has_key(name):
-			raise "Duplicate service specification: '%s' at %s" % (name, loginfo)
+			raise PyromanException("Duplicate service specification: '%s' at %s" % (name, loginfo))
 		if sports == "" and dports == "" and include == "" and (name != "ANY"):
-			raise "service specification invalid: '%s' at %s" % (name, loginfo)
+			raise PyromanException("service specification invalid: '%s' at %s" % (name, loginfo))
 
 		self.name = name
 		try:
 			self.sports = map( lambda p: Port(p), Util.splitter.split(sports) )
 			self.dports = map( lambda p: Port(p), Util.splitter.split(dports) )
 		except PortInvalidSpec, p:
-			raise "Service '%s' contains invalid port spec '%s' at %s: %s" \
-				% (name, p.spec, loginfo, p.err)
+			raise PyromanException("Service '%s' contains invalid port spec '%s' at %s: %s" \
+				% (name, p.spec, loginfo, p.err))
 		# store includes, cannot be verified yet
 		self.include = []
 		if include:
@@ -73,7 +74,7 @@ class Service:
 			dir1 = "d"
 			dir2 = "s"
 		else:
-			raise "Invalid direction specified: %s" % dir
+			raise PyromanException("Invalid direction specified: %s" % dir)
 		result = []
 		for sp in self.sports:
 			for dp in self.dports:
@@ -107,5 +108,5 @@ class Service:
 		"""
 		for i in self.include:
 			if not i == "" and not Firewall.services.has_key(i):
-				raise "Service '%s' tries to include undefined '%s' at %s" \
-					% (self.name, i, self.loginfo)
+				raise PyromanException("Service '%s' tries to include undefined '%s' at %s" \
+					% (self.name, i, self.loginfo))

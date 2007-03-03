@@ -1,0 +1,6 @@
+<pyroman>
+  <host name="localhost" hostname="*localhost*" ip="0.0.0.0/0" iface="any" />
+  <allow client="localhost" server="ANY" />
+  <allow client="ANY" server="localhost" service="ssh mdns www ping" />
+  <allow client="ANY" server="localhost" service="unprivileged" />
+</pyroman>

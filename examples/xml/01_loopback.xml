@@ -1,0 +1,4 @@
+<pyroman>
+  <iptables chain="INPUT" filter="-i lo -j ACCEPT" />
+  <iptables chain="OUTPUT" filter="-o lo -j ACCEPT" />
+</pyroman>

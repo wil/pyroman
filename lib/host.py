@@ -1,4 +1,4 @@
-#Copyright (c) 2006 Erich Schubert erich@debian.org
+#Copyright (c) 2007 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -19,12 +19,13 @@
 #SOFTWARE.
 from pyroman import Firewall
 from util import Util
+from exception import PyromanException
 
 class Host:
 	"""
 	Represents a single host or a subnet with the same permissions
 	"""
-	def __init__(self, name, ip, iface, hostname, loginfo):
+	def __init__(self, name, ip, iface, hostname="", loginfo=""):
 		"""
 		Create a new host object, with the given name, IP specification and interface
 
@@ -34,24 +35,24 @@ class Host:
 		"""
 		# verify and store name
 		if name == "" and not Util.verify_name(name):
-			raise "Host '%s' lacking a valid name at %s" \
-				% (name, iface, loginfo)
+			raise PyromanException("Host '%s' lacking a valid name at %s" \
+				% (name, iface, loginfo))
 		if Firewall.hosts.has_key(name):
-			raise "Duplicate host specification: '%s' at %s" % (name, loginfo)
+			raise PyromanException("Duplicate host specification: '%s' at %s" % (name, loginfo))
 		self.name = name
 		# verify and store IPs
 		if ip == "":
-			raise "Host '%s' definition lacking IP address at %s" % (name, loginfo)
+			raise PyromanException("Host '%s' definition lacking IP address at %s" % (name, loginfo))
 		self.ip = Util.splitter.split(ip)
 		for i in self.ip:
 			if not Util.verify_ip(i):
-				raise "IP specification '%s' invalid for host '%s' at %s" \
-					% (i, name, loginfo)
+				raise PyromanException("IP specification '%s' invalid for host '%s' at %s" \
+					% (i, name, loginfo))
 		# verify and store interface
 		self.iface = iface
 		if iface == "":
-			raise "Host definition '%s' lacking kernel interfaces at %s" \
-				% (name, loginfo)
+			raise PyromanException("Host definition '%s' lacking kernel interfaces at %s" \
+				% (name, loginfo))
 		# store "real" hostname (which may be longer than nick)
 		# this is used for "localhost detection"
 		self.hostname = hostname
@@ -98,5 +99,5 @@ class Host:
 		Verifies that the interface given was properly defined.
 		"""
 		if not Firewall.interfaces.has_key(self.iface):
-			raise "Host '%s' is assigned interface '%s' which is not defined at %s" \
-				% (self.name, self.iface, self.loginfo)
+			raise PyromanException("Host '%s' is assigned interface '%s' which is not defined at %s" \
+				% (self.name, self.iface, self.loginfo))

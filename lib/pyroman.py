@@ -1,4 +1,4 @@
-#Copyright (c) 2006 Erich Schubert erich@debian.org
+#Copyright (c) 2007 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@ import sys, socket, signal, re
 from util import Util
 from iptables import Iptables
 from popen2 import popen3
+from exception import PyromanException
 
 class Firewall:
 	"""
@@ -63,9 +64,9 @@ class Firewall:
 
 	def __init__(self):
 		"""
-		Dummy initialization function, will raise an exception!
+		Dummy initialization function, will raise PyromanException(an exception!)
 		"""
-		raise "Instanciation not supported!"
+		raise PyromanException("Instanciation not supported!")
 
 	class Error(Exception):
 		"""
@@ -191,7 +192,7 @@ class Firewall:
 			firewall changes withing the given time limit.
 			The firewall will then be rolled back.
 			"""
-			raise Firewall.Error("Success not confirmed by user")
+			raise PyromanException(Firewall.Error("Success not confirmed by user"))
 
 		lines = Firewall.calciptableslines()
 
@@ -216,7 +217,7 @@ class Firewall:
 				signal.signal(signal.SIGALRM, signal.SIG_DFL)
 
 				if not re.search("^(OK|YES)", input, re.I):
-					raise Firewall.Error("Success not confirmed by user")
+					raise PyromanException(Firewall.Error("Success not confirmed by user"))
 		except Iptables.Error, e:
 			sys.stderr.write("*"*70+"\n")
 			sys.stderr.write("An error occurred. Starting firewall restoration.\n")
@@ -252,9 +253,9 @@ class Firewall:
 			ir.close()
 			ie.close()
 			Firewall._kernelversion = result[0].strip()
-			# still no version number? - raise an exception
+			# still no version number? - raise PyromanException(an exception)
 			if not Firewall._kernelversion:
-				raise Error("Couldn't get kernel version!")
+				raise PyromanException(Error("Couldn't get kernel version!"))
 		if not min and not max:
 			return Firewall._kernelversion
 		if min:

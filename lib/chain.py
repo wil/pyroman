@@ -1,4 +1,4 @@
-#Copyright (c) 2006 Erich Schubert erich@debian.org
+#Copyright (c) 2007 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -18,6 +18,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 from pyroman import Firewall
+from exception import PyromanException
 
 class Chain:
 	"""
@@ -52,7 +53,7 @@ class Chain:
 
 		chain = "%s_%s_%s_%s" % (ifname, ofname, cname, sname)
 		if len(chain) >= 32:
-			raise "Chain name length too long, use shorter nicknames: %s" % chain
+			raise PyromanException("Chain name length too long, use shorter nicknames: %s" % chain)
 
 		return chain
 	make_chain_name = staticmethod(make_chain_name)
@@ -79,11 +80,13 @@ class Chain:
 					inface = outface
 				outface = None
 
+			if not Firewall.chains.has_key(parent):
+				raise PyromanException("Unknown chain specified: %s" % parent)
 			p = Firewall.chains[parent]
 
 			# this is localhost talking to localhost...
 			if server and server.islocalhost() and client and client.islocalhost():
-				raise "Localhost talking to localhost?"
+				raise PyromanException("Localhost talking to localhost?")
 
 			crules = [""]
 			srules = [""]

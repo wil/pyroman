@@ -12,21 +12,25 @@ add_host(
 )
 # if you want a restriction on outgoing connections, add that here.
 allow(
-	client="localhost"
+	client="localhost",
+	server="ANY"
 )
 # only allow certain incoming connections:
 allow(
+	client="ANY",
 	server="localhost",
 	service="ssh mdns www ping"
 )
 # if you want to protect some 'unprivileged ports', add that here
 # reject(
+# 	client="ANY",
 # 	server="localhost"
 # 	service="8080/tcp"
 # )
 
 # open unprivileged ports by default. Remove if you don't want that.
 allow(
+	client="ANY",
 	server="localhost",
 	service="unprivileged"
 )

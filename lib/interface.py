@@ -1,4 +1,4 @@
-#Copyright (c) 2006 Erich Schubert erich@debian.org
+#Copyright (c) 2007 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +19,7 @@
 #SOFTWARE.
 from pyroman import Firewall
 from util import Util
+from exception import PyromanException
 
 class Interface:
 	"""
@@ -32,13 +33,13 @@ class Interface:
 		iface -- kernel interface names, e.g. "eth0 eth1"
 		"""
 		if name == "" or not Util.verify_name(name):
-			raise "Interface lacking a valid name (name: %s, iface: %s) at %s" \
-				% (name, iface, loginfo)
+			raise PyromanException("Interface lacking a valid name (name: %s, iface: %s) at %s" \
+				% (name, iface, loginfo))
 		if Firewall.interfaces.has_key(name):
-			raise "Duplicate interface specification: %s at %s" % (name, loginfo)
+			raise PyromanException("Duplicate interface specification: %s at %s" % (name, loginfo))
 		if iface == "":
-			raise "Interface definition lacking kernel interfaces: %s at %s" \
-				% (name, loginfo)
+			raise PyromanException("Interface definition lacking kernel interfaces: %s at %s" \
+				% (name, loginfo))
 		self.name = name
 		self.iface = Util.splitter.split(iface)
 		self.loginfo = loginfo
@@ -59,7 +60,7 @@ class Interface:
 		elif dir == "s":
 			idir = "i"
 		else:
-			raise "Unknown direction specified: %s" % dir
+			raise PyromanException("Unknown direction specified: %s" % dir)
 		# when necessary, turn around filter directions
 		result = []
 		for i in self.iface:

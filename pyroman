@@ -7,7 +7,7 @@ default_rules_path = "./examples/base"
 # timeout for the "safe" mode invocation
 safe_timeout_default = 30
 
-#Copyright (c) 2006 Erich Schubert erich@debian.org
+#Copyright (c) 2007 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ sys.path.insert(0, library_path)
 # usercommands, the Firewall class and the firewall object
 # should be available to user rules
 from pyroman import Firewall
+from xmlsyntax import XMLSyntax
 from commands import *
 
 # Pyroman version
@@ -105,17 +106,36 @@ def main():
 def run(rules_path, no_act, print_only, verbose_print):
 	# load user rules alphabetically
 	rfiles = glob.glob(os.path.join(rules_path,"*.py"))
+	rfiles.extend( glob.glob(os.path.join(rules_path,"*.xml")) )
 	if len(rfiles) < 1:
 		print "No rule files found in directory '%s'!" % rules_path
 		sys.exit(1)
 	rfiles.sort()
 	for nam in rfiles:
-		execfile(nam)
+		try:
+			if nam.endswith(".py"):
+				execfile(nam)
+			elif nam.endswith(".xml"):
+				XMLSyntax.parseFile(nam)
+		except Exception, e:
+			print "An exception occurred during parsing '%s':" % nam
+			print e
+			sys.exit(3)
 
 	# do some consistency checks
-	Firewall.verify()
+	try:
+		Firewall.verify()
+	except Exception, e:
+		print "An exception occurred during verification:"
+		print e
+		sys.exit(3)
 	# generate...
-	Firewall.generate()
+	try:
+		Firewall.generate()
+	except Exception, e:
+		print "An exception occurred during generation:"
+		print e
+		sys.exit(3)
 	# execute firewall
 	if no_act:
 		print "Syntax checks passed, would commit to iptables now."

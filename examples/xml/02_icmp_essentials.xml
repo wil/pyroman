@@ -1,0 +1,9 @@
+<pyroman>
+  <iptables chain="INPUT" filter="-p icmp --icmp-type router-advertisement -j DROP" />
+  <iptables chain="INPUT" filter="-p icmp --icmp-type destination-unreachable -j ACCEPT" />
+  <iptables chain="INPUT" filter="-p icmp --icmp-type time-exceeded -j ACCEPT" />
+  <iptables chain="OUTPUT" filter="-p icmp --icmp-type destination-unreachable -j ACCEPT" />
+  <iptables chain="OUTPUT" filter="-p icmp --icmp-type time-exceeded -j ACCEPT" />
+  <iptables chain="FORWARD" filter="-p icmp --icmp-type destination-unreachable -j ACCEPT" />
+  <iptables chain="FORWARD" filter="-p icmp --icmp-type time-exceeded -j ACCEPT" />
+</pyroman>

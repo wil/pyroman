@@ -4,7 +4,7 @@ Commands to be used in pyroman rules files.
 allow, reject, drop are just convenience commands, that can be replaced by
 add_rule(Firewall.allow, ...) etc. but that are easier to read.
 """
-#Copyright (c) 2006 Erich Schubert erich@debian.org
+#Copyright (c) 2007 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ add_rule(Firewall.allow, ...) etc. but that are easier to read.
 from pyroman import Firewall
 from util import Util
 from chain import Chain
+from exception import PyromanException
 import port, service, interface, host, nat, rule
 
 def add_service(name, sports="", dports="", include=None):
@@ -90,7 +91,7 @@ def add_nat(client="", server=None, ip=None, port=None, dport=None, dir="in"):
 	"""
 	loginfo = Util.get_callee(3)
 	if not server or not ip:
-		raise "Server not specified for NAT (server: %s, ip: %s) at %s" % (server, ip, loginfo)
+		raise PyromanException("Server not specified for NAT (server: %s, ip: %s) at %s" % (server, ip, loginfo))
 	# special case: "out" NAT type
 	if dir=="out":
 		(client, server) = (server, client)
@@ -109,7 +110,7 @@ def add_rule(target, server="", client="", service=""):
 
 	loginfo = Util.get_callee(4)
 	if server == "" and client == "" and service == "":
-		raise "allow() called without parameters at %s" % loginfo
+		raise PyromanException("allow() called without parameters at %s" % loginfo)
 	for srv in Util.splitter.split(server):
 		for cli in Util.splitter.split(client):
 			for svc in Util.splitter.split(service):
@@ -127,7 +128,7 @@ def add_chain(name, default="-", table="filter", id=None):
 	if not id:
 		id = name
 	if Firewall.chains.has_key(id):
-		raise "Firewall chain %s defined multiple times at %s" % (id, Util.get_callee(3))
+		raise PyromanException("Firewall chain %s defined multiple times at %s" % (id, Util.get_callee(3)))
 	loginfo = "Chain %s created by %s" % (name, Util.get_callee(3))
 	Firewall.chains[id] = Chain(name, loginfo, default=default, table=table)
 
@@ -173,7 +174,7 @@ def iptables(chain, filter):
 	"""
 	loginfo = Util.get_callee(3)
 	if not Firewall.chains.has_key(chain):
-		raise "Firewall chain %s not known (use add_chain!) at %s" % (chain, loginfo)
+		raise PyromanException("Firewall chain %s not known (use add_chain!) at %s" % (chain, loginfo))
 	Firewall.chains[chain].append(filter, loginfo)
 
 def iptables_end(chain, filter):
@@ -186,5 +187,5 @@ def iptables_end(chain, filter):
 	"""
 	loginfo = Util.get_callee(3)
 	if not Firewall.chains.has_key(chain):
-		raise "Firewall chain %s not known (use add_chain!) at %s" % (chain, loginfo)
+		raise PyromanException("Firewall chain %s not known (use add_chain!) at %s" % (chain, loginfo))
 	Firewall.chains[chain].append_end(filter, loginfo)

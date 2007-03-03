@@ -1,0 +1,12 @@
+<pyroman>
+  <!-- the *accept* value is magic for Firewall.accept -->
+  <chain name="*accept*" />
+  <iptables chain="*accept*" filter="-j ACCEPT" />
+  <!-- for just discarding packets -->
+  <chain name="*drop*" />
+  <iptables chain="*drop*" filter="-j DROP" />
+  <!-- rules for doing a pretty 'reject' (i.e. connection refused) -->
+  <chain name="*reject*" />
+  <iptables chain="*reject*" filter="-p tcp -j REJECT --reject-with tcp-reset" />
+  <iptables chain="*reject*" filter="-j REJECT" />
+</pyroman>

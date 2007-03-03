@@ -1,4 +1,4 @@
-#Copyright (c) 2006 Erich Schubert erich@debian.org
+#Copyright (c) 2007 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@ from pyroman import Firewall
 from service import Service
 from port import PortInvalidSpec
 from chain import Chain
+from exception import PyromanException
 
 class Rule:
 	"""
@@ -46,7 +47,7 @@ class Rule:
 		self.loginfo = loginfo
 
 		if not server and not client:
-			raise "Rules need at least a server or a client at %s" % loginfo
+			raise PyromanException("Rules need at least a server or a client at %s" % loginfo)
 
 		# a complete verification will be done when all user files have been
 		# processed (and thus no new services can be added any more)
@@ -105,13 +106,13 @@ class Rule:
 		# verify server name given
 		if self.server != "":
 			if not Firewall.hosts.has_key(self.server):
-				raise "Rule refers to unknown host as server: '%s' at %s" \
-					% (self.server, self.loginfo)
+				raise PyromanException("Rule refers to unknown host as server: '%s' at %s" \
+					% (self.server, self.loginfo))
 		# verify client name given
 		if self.client != "":
 			if not Firewall.hosts.has_key(self.client):
-				raise "Rule refers to unknown host as client: '%s' at %s" \
-					% (self.client, self.loginfo)
+				raise PyromanException("Rule refers to unknown host as client: '%s' at %s" \
+					% (self.client, self.loginfo))
 		# for services not yet defined, try to autocreate them
 		if self.service != "" and self.service not in Firewall.services:
 			try:
@@ -119,6 +120,6 @@ class Rule:
 					include=None, loginfo=self.loginfo)
 				Firewall.services[self.service] = s
 			except PortInvalidSpec:
-				raise "Rule refers to unknown service: '%s' at %s" \
-					% (self.service, self.loginfo)
+				raise PyromanException("Rule refers to unknown service: '%s' at %s" \
+					% (self.service, self.loginfo))
 

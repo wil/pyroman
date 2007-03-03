@@ -1,0 +1,8 @@
+<pyroman>
+  <iptables chain="INPUT" filter="-m state --state ESTABLISHED,RELATED -j *accept*" />
+  <iptables chain="INPUT" filter="-m state --state INVALID -j *drop*" />
+  <iptables chain="OUTPUT" filter="-m state --state ESTABLISHED,RELATED -j *accept*" />
+  <iptables chain="OUTPUT" filter="-m state --state INVALID -j *drop*" />
+  <iptables chain="FORWARD" filter="-m state --state ESTABLISHED,RELATED -j *accept*" />
+  <iptables chain="FORWARD" filter="-m state --state INVALID -j *drop*" />
+</pyroman>
