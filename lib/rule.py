@@ -65,9 +65,15 @@ class Rule:
 			outface = self.server.iface
 
 		if inface == outface \
-			and not self.client.islocalhost() \
-			and not self.server.islocalhost():
+			and self.client and not self.client.islocalhost() \
+			and self.server and not self.server.islocalhost():
 			return
+
+		# skip forwarding chains when not forwarding
+		if not Firewall.forwarding:
+			if not ((self.client and self.client.islocalhost()) or \
+			        (self.server and self.server.islocalhost())):
+				return
 
 		chain = Chain.get_chain(inface, outface, self.client, self.server, self.loginfo)
 

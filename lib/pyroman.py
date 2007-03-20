@@ -43,7 +43,8 @@ class Firewall:
 	rules -- list of firewall rules
 	"""
 	hostname = socket.gethostname()
-	# Timeout when the firewall setup will be rolled back when no OK is received.
+	# Timeout when the firewall setup will be rolled back when
+	# no OK is received.
 	timeout = 0
 
 	# Target names for the "accept", "drop" and "reject" commands
@@ -57,6 +58,9 @@ class Firewall:
 	chains = {}
 	nats = []
 	rules = []
+
+	# forwarding firewall. Default to yes
+	forwarding = True
 
 	# for testing kernel version
 	kernelversioncmd = "/bin/uname -r"
