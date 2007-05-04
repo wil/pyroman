@@ -19,3 +19,12 @@
 #SOFTWARE.
 
 # Not much to init here.
+from exception import PyromanException
+from pyroman import Firewall
+from xmlsyntax import parseXML
+from commands import *
+
+__all__ = [ 'PyromanException', 'Firewall', 'parseXML', 'add_chain',
+	'add_host', 'add_interface', 'add_nat', 'add_rule', 'add_service', 'allow',
+	'drop', 'host', 'interface', 'iptables', 'iptables_end', 'nat', 'port',
+	'reject', 'rule', 'service']
