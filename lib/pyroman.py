@@ -221,7 +221,7 @@ class Firewall:
 				sys.stderr.write("activating new... ")
 			successful = Iptables.commit(lines)
 			if terse_mode:
-				sys.stderr.write("success.\n")
+				sys.stderr.write("success")
 			else:
 				sys.stderr.write("New firewall commited successfully.\n")
 			if Firewall.timeout > 0:
