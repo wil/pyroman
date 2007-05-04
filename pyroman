@@ -38,7 +38,7 @@ from xmlsyntax import XMLSyntax
 from commands import *
 
 # Pyroman version
-version = "0.4"
+version = "0.4.3"
 
 def usage():
 	print """\
