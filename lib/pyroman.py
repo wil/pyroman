@@ -184,7 +184,7 @@ class Firewall:
 			print line[0]
 	print_rules = staticmethod(print_rules)
 
-	def execute_rules():
+	def execute_rules(terse_mode=False):
 		"""
 		Execute the generated rules, rollback on error.
 		If Firewall.timeout is set, give the user some time to accept the
@@ -201,14 +201,22 @@ class Firewall:
 		lines = Firewall.calciptableslines()
 
 		# Save old firewall.
-		sys.stderr.write("Saving old firewall...\n")
+		if terse_mode:
+			sys.stderr.write("backing up current... ")
+		else:
+			sys.stderr.write("Backing up current firewall...\n")
 		savedlines = Iptables.save()
 
 		# now try to execute the new rules
 		successful = False
 		try:
+			if terse_mode:
+				sys.stderr.write("activating new... ")
 			successful = Iptables.commit(lines)
-			sys.stderr.write("New firewall commited successfully.\n")
+			if terse_mode:
+				sys.stderr.write("success.\n")
+			else:
+				sys.stderr.write("New firewall commited successfully.\n")
 			if Firewall.timeout > 0:
 				sys.stderr.write("To accept the new configuration, type 'OK' within %d seconds!\n" % Firewall.timeout)
 				# setup timeout
@@ -223,20 +231,29 @@ class Firewall:
 				if not re.search("^(OK|YES)", input, re.I):
 					raise PyromanException(Firewall.Error("Success not confirmed by user"))
 		except Iptables.Error, e:
-			sys.stderr.write("*"*70+"\n")
-			sys.stderr.write("An error occurred. Starting firewall restoration.\n")
+			if terse_mode:
+				sys.stderr.write("error... restoring backup.\n")
+			else:
+				sys.stderr.write("*"*70+"\n")
+				sys.stderr.write("An Iptables error occurred. Starting firewall restoration.\n")
 			Firewall.rollback(savedlines)
 			# show exception
 			sys.stderr.write("%s\n" % e);
 		except Firewall.Error, e:
-			sys.stderr.write("*"*70+"\n")
-			sys.stderr.write("An error occurred. Starting firewall restoration.\n")
+			if terse_mode:
+				sys.stderr.write("error. Restoring old firewall.\n")
+			else:
+				sys.stderr.write("*"*70+"\n")
+				sys.stderr.write("A Firewall error occurred. Starting firewall restoration.\n")
 			Firewall.rollback(savedlines)
 			# show exception
 			sys.stderr.write("%s\n" % e);
 		except:
-			sys.stderr.write("*"*70+"\n")
-			sys.stderr.write("An error occurred. Starting firewall restoration.\n")
+			if terse_mode:
+				sys.stderr.write("error. Restoring old firewall.\n")
+			else:
+				sys.stderr.write("*"*70+"\n")
+				sys.stderr.write("An unknown error occurred. Starting firewall restoration.\n")
 			Firewall.rollback(savedlines)
 			sys.stderr.write("\nHere is the exception triggered during execution:\n")
 			raise

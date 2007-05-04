@@ -69,7 +69,7 @@ class Iptables:
 					break
 			# still no version number? - raise PyromanException(an exception)
 			if not Iptables._version:
-				raise PyromanException(Error("Couldn't get iptables version!"))
+				raise Error("Couldn't get iptables version!")
 		if not min and not max:
 			return Iptables._version
 		if min:
@@ -160,8 +160,8 @@ class Iptables:
 		success = (ipr.wait() == 0)
 		if not success:
 			if errormsg:
-				raise PyromanException(Iptables.Error("Firewall commit failed: %s, caused by %s" % (errormsg[0], errormsg[1])))
+				raise Iptables.Error("Firewall commit failed: %s, caused by %s" % (errormsg[0], errormsg[1]))
 			else:
-				raise PyromanException(Iptables.Error("Firewall commit failed due to unknown error."))
+				raise Iptables.Error("Firewall commit failed due to unknown error.")
 		return success
 	commit = staticmethod(commit)
