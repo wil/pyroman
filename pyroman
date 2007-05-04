@@ -1,7 +1,7 @@
 #!/usr/bin/python
 """ Pyroman, an iptables firewall configuration tool """
 # where the pyroman libraries are found - e.g. /usr/share/pyroman
-library_path = "./lib"
+library_path = "./"
 # where the rules are located - e.g. /etc/pyroman
 default_rules_path = "./examples/base"
 # timeout for the "safe" mode invocation
@@ -33,9 +33,7 @@ sys.path.insert(0, library_path)
 
 # usercommands, the Firewall class and the firewall object
 # should be available to user rules
-from pyroman import Firewall
-from xmlsyntax import XMLSyntax
-from commands import *
+from pyroman import *
 
 # Pyroman version
 version = "0.4.3"
@@ -120,7 +118,7 @@ def run(rules_path, no_act, print_only, verbose_print, terse_mode):
 			if nam.endswith(".py"):
 				execfile(nam)
 			elif nam.endswith(".xml"):
-				XMLSyntax.parseFile(nam)
+				parseXML(nam)
 		except Exception, e:
 			print "An exception occurred during parsing '%s':" % nam
 			print e
