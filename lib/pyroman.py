@@ -20,6 +20,7 @@
 import sys, socket, signal, re
 from util import Util
 from iptables import Iptables
+#import iptables_parse
 from popen2 import popen3
 from exception import PyromanException
 
@@ -196,7 +197,7 @@ class Firewall:
 			firewall changes withing the given time limit.
 			The firewall will then be rolled back.
 			"""
-			raise PyromanException(Firewall.Error("Success not confirmed by user"))
+			raise Firewall.Error("Success not confirmed by user")
 
 		lines = Firewall.calciptableslines()
 
@@ -206,6 +207,12 @@ class Firewall:
 		else:
 			sys.stderr.write("Backing up current firewall...\n")
 		savedlines = Iptables.save()
+
+		# parse the firewall setup
+		#try:
+		#	parsed = iptables_parse.parse(savedlines)
+		#except:
+		#	pass
 
 		# now try to execute the new rules
 		successful = False
@@ -229,7 +236,7 @@ class Firewall:
 				signal.signal(signal.SIGALRM, signal.SIG_DFL)
 
 				if not re.search("^(OK|YES)", input, re.I):
-					raise PyromanException(Firewall.Error("Success not confirmed by user"))
+					raise Firewall.Error("Success not confirmed by user")
 		except Iptables.Error, e:
 			if terse_mode:
 				sys.stderr.write("error... restoring backup.\n")
@@ -276,7 +283,7 @@ class Firewall:
 			Firewall._kernelversion = result[0].strip()
 			# still no version number? - raise PyromanException(an exception)
 			if not Firewall._kernelversion:
-				raise PyromanException(Error("Couldn't get kernel version!"))
+				raise Error("Couldn't get kernel version!")
 		if not min and not max:
 			return Firewall._kernelversion
 		if min:
