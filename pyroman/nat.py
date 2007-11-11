@@ -19,7 +19,7 @@
 #SOFTWARE.
 from pyroman import Firewall
 from util import Util
-from port import Port
+from port import Port, PortInvalidSpec
 from chain import Chain
 from exception import PyromanException
 
