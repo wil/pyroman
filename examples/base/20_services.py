@@ -20,7 +20,6 @@ add_service("auth", dports="auth/tcp")
 # HTTP and HTTPS on different ports
 add_service("http", dports="www/tcp")
 add_service("https", dports="https/tcp")
-add_service("http81", dports="81/tcp")
 add_service("www", include="http https")
 # FTP
 add_service("ftp", dports="ftp/tcp")
