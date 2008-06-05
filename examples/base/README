@@ -9,5 +9,6 @@ Your distribution probably has the configuration examples installed in
 /usr/share/doc/pyroman/examples for your reference.
 
 When you run pyroman with the "base" configuration only, the resulting
-firewall will reject all connections - there are no hosts defined, and 
-now "allow" statements in this setup. So it's up to you to add these!
+firewall will reject all connections (including outgoing ones) - there are no
+hosts defined, and no "allow" statements in this setup. So it's up to you to
+add these!
