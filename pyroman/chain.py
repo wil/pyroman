@@ -66,16 +66,16 @@ class Chain:
 		if not Firewall.chains.has_key(chain):
 			c = Chain(chain, loginfo)
 
-			parent = "FORWARD"
+			parent = "forward"
 
 			# if we are talking about localhost, things are different...
 			if client and client.islocalhost():
-				parent = "OUTPUT"
+				parent = "output"
 				if not outface:
 					outface = inface
 				inface = None
 			if server and server.islocalhost():
-				parent = "INPUT"
+				parent = "input"
 				if not inface:
 					inface = outface
 				outface = None
@@ -120,7 +120,7 @@ class Chain:
 
 		name -- Name for this chain
 		loginfo -- Why the chain was created, for error reporting
-		default -- default target for this chain (for INPUT, OUTPUT, ACCEPT)
+		default -- default target for this chain (for INPUT, OUTPUT, FORWARD)
 		table -- table this chain resides in
 		"""
 		self.name = name
