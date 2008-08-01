@@ -41,7 +41,9 @@ def _processNode(node, filename=None):
 	"""
 	Process a single node from the document tree
 	"""
-	if node.nodeName == "iptables":
+	if node.nodeName == "param":
+		_processParamNode(node, filename)
+	elif node.nodeName == "iptables":
 		_processIptablesNode(node, filename)
 	elif node.nodeName == "host":
 		_processHostNode(node, filename)
@@ -59,6 +61,29 @@ def _processNode(node, filename=None):
 	or node.nodeName == "rule":
 		_processRuleNode(node, filename)
 
+def _processParamNode(node, filename=None):
+	"""
+	Process a node to represent a parameter assignment
+	"""
+	name = None
+	value = None
+	if node.hasAttribute("name"):
+		name = node.getAttribute("name")
+	else:
+		raise PyromanException("No parameter name given in param tag in %s" % filename)
+	if node.hasAttribute("value"):
+		value = node.getAttribute("value")
+	else:
+		raise PyromanException("No value given for parameter '%s' in %s" % (name, filename))
+	if name.startswith("Firewall."):
+		shortname = name[len("Firewall."):]
+		if not shortname in dir(Firewall):
+			raise PyromanException("Unknown parameter '%s' in %s" % (name, filename))
+		try:
+			setattr(Firewall, shortname, value)
+		except:
+			raise PyromanException("Setting parameter '%s' failed in %s" % (name, filename))
+
 def _processIptablesNode(node, filename=None):
 	"""
 	Process a node equivalent to an iptables() command
@@ -72,12 +97,21 @@ def _processIptablesNode(node, filename=None):
 		filter = filter.replace("*accept*", Firewall.accept)
 		filter = filter.replace("*drop*", Firewall.drop)
 		filter = filter.replace("*reject*", Firewall.reject)
+		filter = filter.replace("*input*", Firewall.input)
+		filter = filter.replace("*output*", Firewall.output)
+		filter = filter.replace("*forward*", Firewall.forward)
 	if chain == "*accept*":
 		chain = Firewall.accept
 	elif chain == "*drop*":
 		chain = Firewall.drop
 	elif chain == "*reject*":
 		chain = Firewall.reject
+	elif chain == "*input*":
+		chain = Firewall.input
+	elif chain == "*output*":
+		chain = Firewall.output
+	elif chain == "*forward*":
+		chain = Firewall.forward
 	if not Firewall.chains.has_key(chain):
 		raise PyromanException("Firewall chain %s not defined at %s" % (chain, filename))
 	Firewall.chains[chain].append(filter, filename)
@@ -98,6 +132,12 @@ def _processChainNode(node, filename=None):
 		name = Firewall.drop
 	elif name == "*reject*":
 		name = Firewall.reject
+	elif name == "*input*":
+		name = Firewall.input
+	elif name == "*output*":
+		name = Firewall.output
+	elif name == "*forward*":
+		name = Firewall.forward
 	if node.hasAttribute("default"):
 		default = node.getAttribute("default")
 	if node.hasAttribute("table"):

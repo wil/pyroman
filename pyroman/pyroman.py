@@ -53,9 +53,13 @@ class Firewall:
 	vercmd = None
 
 	# Target names for the "accept", "drop" and "reject" commands
-	accept = "accept"
-	drop = "drop"
-	reject = "reject"
+	accept = "ACCEPT"
+	drop = "DROP"
+	reject = "REJECT"
+
+	input = "INPUT"
+	output = "OUTPUT"
+	forward = "FORWARD"
 
 	services = {}
 	hosts = {}

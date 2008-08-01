@@ -36,7 +36,7 @@ sys.path.insert(0, library_path)
 from pyroman import *
 
 # Pyroman version
-version = "0.4.5"
+version = "0.4.6"
 
 def usage():
 	print """\
