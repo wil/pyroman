@@ -20,7 +20,8 @@
   <service name="pop3s" dports="pop3s/tcp" />
   <service name="imap" dports="imap/tcp" />
   <service name="imaps" dports="imaps/tcp" />
-  <service name="mail" include="smtp ssmtp pop3 pop3s imap imaps submission/tcp" />
+  <service name="submission" dports="submission/tcp" />
+  <service name="mail" include="smtp ssmtp pop3 pop3s imap imaps submission" />
   <!-- some less common services -->
   <service name="auth" dports="auth/tcp" />
   <service name="ldap" dports="ldap/tcp" />

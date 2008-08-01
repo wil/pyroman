@@ -38,7 +38,8 @@ add_service("pop3", dports="pop3/tcp")
 add_service("pop3s", dports="pop3s/tcp")
 add_service("imap", dports="imap/tcp")
 add_service("imaps", dports="imaps/tcp")
-add_service("mail", include="smtp ssmtp pop3 pop3s imap imaps submission/tcp")
+add_service("submission", dports="submission/tcp")
+add_service("mail", include="smtp ssmtp pop3 pop3s imap imaps")
 # LDAP
 add_service("ldap", dports="ldap/tcp")
 # Heartbeat pings
