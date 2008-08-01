@@ -3,6 +3,14 @@ We'll define some standard services now.
 Usually, you could just give the port spec in the allow rules, but sometimes
 it's more convenient to have an alias name, and you can also do grouping here.
 
+The aliases below will allow you to write e.g. "ssh" instead of "ssh/tcp",
+but some aliases are more complex (e.g. the 'mail' alias which covers all
+common email ports) or the "www" alias for http and https ports.
+
+"ping" on the other hand is clearly more readable than "echo-request/icmp".
+
+In general it's up to the user whether or not he wants to use these aliases.
+
 Ports can be given with their names (as of /etc/services), with port ranges
 (in iptables syntax, i.e. 12:34) trailed by their protocol (12:34/tcp)
 """
@@ -30,7 +38,7 @@ add_service("pop3", dports="pop3/tcp")
 add_service("pop3s", dports="pop3s/tcp")
 add_service("imap", dports="imap/tcp")
 add_service("imaps", dports="imaps/tcp")
-add_service("mail", include="smtp ssmtp pop3 pop3s imap imaps")
+add_service("mail", include="smtp ssmtp pop3 pop3s imap imaps submission/tcp")
 # LDAP
 add_service("ldap", dports="ldap/tcp")
 # Heartbeat pings
@@ -43,6 +51,7 @@ add_service("dhcp", sports="bootpc/udp", dports="bootps/udp")
 add_service("mdns", sports="5353/udp", dports="5353/udp")
 
 # Windows shares are really annoying
+# this is a set of 4 ports on two protocols and two directions each...
 add_service("winTCPin", sports="137:139/tcp 445/tcp")
 add_service("winTCPout", dports="137:139/tcp 445/tcp")
 add_service("winUDPin", sports="137:139/udp 445/udp")

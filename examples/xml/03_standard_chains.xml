@@ -3,6 +3,9 @@
   the 'allow', 'drop' or 'reject' statements. 'allow' and 'drop' could be
   hardwired to the ACCEPT, DROP and REJECT iptables actions, however these two
   chains can still be useful for statistics. -->
+  <param name="Firewall.accept" value="accept" />
+  <param name="Firewall.drop" value="drop" />
+  <param name="Firewall.reject" value="reject" />
   <!-- The 'reject' chain defined here has a more verbose reject on TCP
   connection attempts that plays more nicely with some services -->
   <!-- the '*accept*' value is magic for the variable Firewall.accept -->

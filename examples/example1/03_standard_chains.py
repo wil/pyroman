@@ -13,6 +13,7 @@ and that you get complete traffic counters in these chains.
 The variables "Firewall.accept", "Firewall.drop" and "Firewall.reject" are
 used here, so you can change them in one place only.
 """
+Firewall.accept="accept"
 add_chain(Firewall.accept)
 # Kernel and iptables can do new string matches?
 if Firewall.iptables_version(min="1.3.4") and \
@@ -24,10 +25,12 @@ if Firewall.iptables_version(min="1.3.4") and \
 iptables(Firewall.accept, "-j ACCEPT")
 
 # this is a silent drop
+Firewall.drop="drop"
 add_chain(Firewall.drop)
 iptables(Firewall.drop, "-j DROP")
 
 # .. these are clean "reject" rules (i.e. send 'connection refused' back)
+Firewall.reject="reject"
 add_chain(Firewall.reject)
 iptables(Firewall.reject, "-p tcp -j REJECT --reject-with tcp-reset")
 iptables(Firewall.reject, "-j REJECT")

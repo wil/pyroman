@@ -1,12 +1,24 @@
 <pyroman>
   <!-- these rules are standard connection tracking handling: we allow any
   established connection to persist and related connections to go through. -->
+  <!-- we setup chains for 'input' etc. that only get connections the kernels
+  connection tracking considers as being NEW, so in case the ctstate module
+  fails it will not send packets there -->
+  <param name="Firewall.input" value="input" />
+  <param name="Firewall.output" value="output" />
+  <param name="Firewall.forward" value="forward" />
+  <chain name="*input*" />
+  <chain name="*output*" />
+  <chain name="*forward*" />
   <!-- again we're using magic values *accept* here for the Firewall.accept
   variables, so we can use the easier to read allow/drop/reject statements -->
-  <iptables chain="INPUT" filter="-m state --state ESTABLISHED,RELATED -j *accept*" />
-  <iptables chain="INPUT" filter="-m state --state INVALID -j *drop*" />
-  <iptables chain="OUTPUT" filter="-m state --state ESTABLISHED,RELATED -j *accept*" />
-  <iptables chain="OUTPUT" filter="-m state --state INVALID -j *drop*" />
-  <iptables chain="FORWARD" filter="-m state --state ESTABLISHED,RELATED -j *accept*" />
-  <iptables chain="FORWARD" filter="-m state --state INVALID -j *drop*" />
+  <iptables chain="INPUT" filter="-m conntrack --ctstate ESTABLISHED,RELATED -j *accept*" />
+  <iptables chain="INPUT" filter="-m conntrack --ctstate INVALID -j *drop*" />
+  <iptables chain="INPUT" filter="-m conntrack --ctstate INVALID -j *input*" />
+  <iptables chain="OUTPUT" filter="-m conntrack --ctstate ESTABLISHED,RELATED -j *accept*" />
+  <iptables chain="OUTPUT" filter="-m conntrack --ctstate INVALID -j *drop*" />
+  <iptables chain="OUTPUT" filter="-m conntrack --ctstate INVALID -j *output*" />
+  <iptables chain="FORWARD" filter="-m conntrack --ctstate ESTABLISHED,RELATED -j *accept*" />
+  <iptables chain="FORWARD" filter="-m conntrack --ctstate INVALID -j *drop*" />
+  <iptables chain="FORWARD" filter="-m conntrack --ctstate INVALID -j *forward*" />
 </pyroman>
