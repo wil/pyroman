@@ -7,7 +7,7 @@ default_rules_path = "./examples/base"
 # timeout for the "safe" mode invocation
 safe_timeout_default = 30
 
-#Copyright (c) 2007 Erich Schubert erich@debian.org
+#Copyright (c) 2008 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -36,13 +36,13 @@ sys.path.insert(0, library_path)
 from pyroman import *
 
 # Pyroman version
-version = "0.4.4"
+version = "0.4.5"
 
 def usage():
 	print """\
 Usage: pyroman [-hiVnspP] [--help] [--init] [--version] [--no-act]
        [-r rulesdir] [--rules=rulesdir] [--print] [--print-verbose]
-       [-t seconds] [--timeout=seconds] [--safe] [safe]\
+       [-t seconds] [--timeout=seconds] [--verification-cmd=cmd] [--safe] [safe]\
 """
 
 def main():
@@ -55,7 +55,7 @@ def main():
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], "hiVr:t:snpP", \
 			["help", "init", "version", "rules=", "timeout=", "safe", "no-act",
-			 "print", "print-verbose"])
+			 "print", "print-verbose", "verification-cmd=", "verification-command="])
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
@@ -82,6 +82,9 @@ def main():
 		if o in ("-s", "--safe"):
 			if not Firewall.timeout:
 				Firewall.timeout = safe_timeout_default
+		# Use external verification command
+		if o in ("--verification-cmd", "--verification-command"):
+			Firewall.vercmd = a
 		# Don't execute firewall
 		if o in ("-n", "--no-act"):
 			no_act = True

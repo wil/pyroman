@@ -21,8 +21,8 @@ import sys, socket, signal, re
 from util import Util
 from iptables import Iptables
 #import iptables_parse
-from popen2 import popen3
 from exception import PyromanException
+import subprocess
 
 class Firewall:
 	"""
@@ -32,6 +32,7 @@ class Firewall:
 
 	hostname -- automatically filled with the computers hostname
 	timeout -- timeout for confirmation of the firewall by the user. 0 will disable auto-rollback
+	vercmd -- command to do an external firewall verification
 	accept -- target chain name for the accept() user command
 	drop -- target chain name for the drop() user command
 	reject -- target chain name for the reject() user command
@@ -47,6 +48,9 @@ class Firewall:
 	# Timeout when the firewall setup will be rolled back when
 	# no OK is received.
 	timeout = 0
+
+	# Don't do external verification by default
+	vercmd = None
 
 	# Target names for the "accept", "drop" and "reject" commands
 	accept = "accept"
@@ -64,7 +68,7 @@ class Firewall:
 	forwarding = True
 
 	# for testing kernel version
-	kernelversioncmd = "/bin/uname -r"
+	kernelversioncmd = ["/bin/uname", "-r"]
 	_kernelversion = None
 
 	def __init__(self):
@@ -224,6 +228,19 @@ class Firewall:
 				sys.stderr.write("success")
 			else:
 				sys.stderr.write("New firewall commited successfully.\n")
+			if Firewall.vercmd:
+				vcmd = subprocess.Popen(Firewall.vercmd, shell=True,
+					stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				result = vcmd.communicate()
+				if len(result[0]) > 0 or len(result[1]) > 0:
+					if len(result[0]) > 0:
+						sys.stderr.write("Verification command output:\n")
+						sys.stderr.write(result[0])
+					if len(result[1]) > 0:
+						sys.stderr.write("Verification command error output:\n")
+						sys.stderr.write(result[1])
+				if vcmd.returncode != 0:
+					raise Firewall.Error("External verification command failed.")
 			if Firewall.timeout > 0:
 				sys.stderr.write("To accept the new configuration, type 'OK' within %d seconds!\n" % Firewall.timeout)
 				# setup timeout
@@ -275,12 +292,10 @@ class Firewall:
 		"""
 		if not Firewall._kernelversion:
 			# query iptables version
-			ir, iw, ie = popen3(Firewall.kernelversioncmd)
-			iw.close()
-			result = ir.readlines()
-			ir.close()
-			ie.close()
-			Firewall._kernelversion = result[0].strip()
+			kvcmd = subprocess.Popen(Firewall.kernelversioncmd,
+				stdout=subprocess.PIPE)
+			result = kvcmd.communicate()[0]
+			Firewall._kernelversion = result.strip()
 			# still no version number? - raise PyromanException(an exception)
 			if not Firewall._kernelversion:
 				raise Error("Couldn't get kernel version!")
