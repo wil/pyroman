@@ -4,7 +4,7 @@ Commands to be used in pyroman rules files.
 allow, reject, drop are just convenience commands, that can be replaced by
 add_rule(Firewall.allow, ...) etc. but that are easier to read.
 """
-#Copyright (c) 2007 Erich Schubert erich@debian.org
+#Copyright (c) 2008 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
