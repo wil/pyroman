@@ -145,3 +145,19 @@ class Iptables:
 				raise Iptables.Error("Firewall commit failed due to unknown error.")
 		return success
 	commit = staticmethod(commit)
+
+class Ip6tables(Iptables):
+	"""
+	Interface to controlling ip6tables
+	"""
+	# iptables commands to use
+	iptablessave = ["/sbin/ip6tables-save", "-c"]
+	iptablesrestore = ["/sbin/ip6tables-restore", "-c"]
+	iptablesset = ["/sbin/ip6tables-restore"]
+	iptablesversion = ["/sbin/ip6tables", "--version"]
+
+	# match for debugging errors
+	#match_errorline = re.compile(r"^Error occurred at line: ([0-9]+)$")
+	match_errormsg  = re.compile(r"^ip6tables-restore(?: v[0-9.]+)?: (?:iptables-restore: )?(.+)$")
+	match_hidemsg   = re.compile(r"^Try `ip6tables-restore -h' or 'ip6tables-restore --help' for more information.$")
+	match_version   = re.compile(r"^ip6tables v([0-9]+\.[0-9.]+)$", re.M)
