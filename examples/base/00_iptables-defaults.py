@@ -1,7 +1,7 @@
 """
 These are the iptables builtin chains.
-In order to use the builtins in Pyroman, we need to define them, too.
-Note that we set the default actions here, too.
+In order to use the builtins in Pyroman, we need to define objects for them.
+Note how we set chain policies!
 """
 add_chain("INPUT",                     default="DROP")
 add_chain("OUTPUT",                    default="DROP")
