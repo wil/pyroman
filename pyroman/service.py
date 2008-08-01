@@ -46,6 +46,7 @@ class Service:
 			raise PyromanException("service specification invalid: '%s' at %s" % (name, loginfo))
 
 		self.name = name
+		self.loginfo = loginfo
 		try:
 			self.sports = map( lambda p: Port(p), Util.splitter.split(sports) )
 			self.dports = map( lambda p: Port(p), Util.splitter.split(dports) )
