@@ -1,4 +1,4 @@
-#Copyright (c) 2008 Erich Schubert erich@debian.org
+#Copyright (c) 2011 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -17,7 +17,7 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-import re, inspect
+import re, inspect, socket
 from exception import PyromanException
 
 class Util:
@@ -28,8 +28,6 @@ class Util:
 	splitter = re.compile("(?:,\s*|\s+)")
 	# regexp to ignore lines in manual rules
 	ignoreline = re.compile("^\s*(#|$)")
-	# regexp to verify an IP with optional netmask
-	ipmask = re.compile("^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)(/([0-9.]+))?$")
 	# nicknames may only contain these chars
 	namefilter = re.compile("^[a-zA-Z0-9]+$")
 	namefilter_service = re.compile("^[a-zA-Z0-9/]+$")
@@ -42,27 +40,71 @@ class Util:
 		return "%s:%d" % (frame[depth-1][1], frame[depth-1][2])
 	get_callee = staticmethod(get_callee)
 
-	def verify_ip(ip, nonet=False):
+	def verify_ip4(ip):
 		"""
-		Verify that a certain string is an IP address
+		Verify that the given string is an IPv4 address
+		"""
+		try:
+			socket.inet_pton(socket.AF_INET, ip)
+			return True
+		except socket.error:
+			return False
+	verify_ip4 = staticmethod(verify_ip4)
 
-		ip -- string to be verified
-		nonet -- if set to True, do not allow subnet specifications
+	def verify_ip6(ip):
 		"""
-		m = Util.ipmask.match(ip)
-		if m is None:
-			return False
-		for i in [1,2,3,4]:
-			if int(m.group(i)) < 0 or int(m.group(i)) > 255:
-				return False
-		if not m.group(5):
+		Verify that the given string is an IPv6 address
+		"""
+		try:
+			socket.inet_pton(socket.AF_INET6, ip)
 			return True
-		if nonet:
+		except socket.error:
 			return False
-		if m.group(6).isdigit() or ipmask.match(m.group(6)):
+	verify_ip6 = staticmethod(verify_ip6)
+
+	def verify_ip4net(ip):
+		"""
+		Verify that the given string describes an IPv4 network
+		"""
+		l = ip.split("/", 1)
+		if len(l) == 0:
+			return False
+		if not Util.verify_ip4(l[0]):
+			return False
+		if len(l) == 1:
 			return True
-		return False
+		n = int(l[1])
+		return (n >= 0) and (n <= 32)
+	verify_ip4net = staticmethod(verify_ip4net)
+
+	def verify_ip6net(ip):
+		"""
+		Verify that the given string describes an IPv6 network
+		"""
+		l = ip.split("/", 1)
+		if len(l) == 0:
+			return False
+		if not Util.verify_ip6(l[0]):
+			return False
+		if len(l) == 1:
+			return True
+		n = int(l[1])
+		return (n >= 0) and (n <= 128)
+	verify_ip6net = staticmethod(verify_ip6net)
+
+	def verify_ip(ip):
+		"""
+		Verify that the given string is an IPv4 or IPv6 address
+		"""
+		return Util.verify_ip4(ip) or Util.verify_ip6(ip)
 	verify_ip = staticmethod(verify_ip)
+
+	def verify_ipnet(ip):
+		"""
+		Verify that the given string is an IPv4 or IPv6 address
+		"""
+		return Util.verify_ip4net(ip) or Util.verify_ip6net(ip)
+	verify_ipnet = staticmethod(verify_ipnet)
 
 	def verify_name(name, servicename=False):
 		"""

@@ -1,4 +1,4 @@
-#Copyright (c) 2008 Erich Schubert erich@debian.org
+#Copyright (c) 2011 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ class Host:
 			raise PyromanException("Host '%s' definition lacking IP address at %s" % (name, loginfo))
 		self.ip = Util.splitter.split(ip)
 		for i in self.ip:
-			if not Util.verify_ip(i):
+			if not Util.verify_ip4net(i):
 				raise PyromanException("IP specification '%s' invalid for host '%s' at %s" \
 					% (i, name, loginfo))
 		# verify and store interface

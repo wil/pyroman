@@ -1,4 +1,4 @@
-#Copyright (c) 2008 Erich Schubert erich@debian.org
+#Copyright (c) 2011 Erich Schubert erich@debian.org
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ class Nat:
 			raise PyromanException("Nat lacking IP address: (client: %s, server: %s) at %s" % (client, server, loginfo))
 		if dir not in ["in", "out", "both"]:
 			raise PyromanException("Nat with invalid direction: (client: %s, server: %s, ip: %s, dir: %s) at %s" % (client, server, ip, dir, loginfo))
-		if not Util.verify_ip(ip,nonet=True):
+		if not Util.verify_ip4(ip):
 			raise PyromanException("Nat with invalid IP address: (client: %s, server: %s, ip: %s) at %s" % (client, server, ip, loginfo))
 		if port:
 			try:
