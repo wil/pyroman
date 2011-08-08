@@ -4,6 +4,6 @@ Many of your policy rules will probably target whole subnets.
 """
 add_host(
 	name="ANY",
-	ip="0.0.0.0/0",
+	ip="0.0.0.0/0 ::/0",
 	iface="any"
 )

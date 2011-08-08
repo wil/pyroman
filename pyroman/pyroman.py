@@ -142,7 +142,7 @@ class Firewall:
 		Calculate the lines to be passed to iptables
 		"""
 		# prepare firewall rules
-		lines = []
+		l4, l6 = [], []
 		# collect tables
 		tables = []
 		for c in Firewall.chains.values():
@@ -151,19 +151,24 @@ class Firewall:
 		# process tables
 		for t in tables:
 			# try to provide some useful help info, in case some error occurs
-			lines.append( ["*%s" % t, "table select statement for table %s" % t] )
+			l4.append( ["*%s" % t, "table select statement for table %s" % t] )
+			l6.append( ["*%s" % t, "table select statement for table %s" % t] )
 			# first create all chains
 			for c in Firewall.chains.values():
 				if c.table == t:
-					lines.append( [c.get_init(), c.loginfo] )
+					l4.append( [c.get_init(), c.loginfo] )
+					l6.append( [c.get_init(), c.loginfo] )
 			# then write rules (which might -j to a table not yet created otherwise)
 			for c in Firewall.chains.values():
 				if c.table == t:
-					for l in c.get_rules():
-						lines.append(l)
+					for l in c.get_rules4():
+						l4.append(l)
+					for l in c.get_rules6():
+						l6.append(l)
 			# commit after each table, try to make a useful error message possible
-			lines.append(["COMMIT", "commit statement for table %s" % t ])
-		return lines
+			l4.append(["COMMIT", "commit statement for table %s" % t ])
+			l6.append(["COMMIT", "commit statement for table %s" % t ])
+		return l4, l6
 	calciptableslines = staticmethod(calciptableslines)
 
 	def rollback(savedlines):
@@ -186,7 +191,15 @@ class Firewall:
 		"""
 		Print the calculated rules, as they would be passed to iptables.
 		"""
-		for line in Firewall.calciptableslines():
+		r4, r6 = Firewall.calciptableslines()
+		print "#### IPv4 rules"
+		for line in r4:
+			if verbose:
+				# print reasoning
+				print "# %s" % line[1]
+			print line[0]
+		print "#### IPv6 rules"
+		for line in r6:
 			if verbose:
 				# print reasoning
 				print "# %s" % line[1]
@@ -207,7 +220,7 @@ class Firewall:
 			"""
 			raise Firewall.Error("Success not confirmed by user")
 
-		lines = Firewall.calciptableslines()
+		r4, r6 = Firewall.calciptableslines()
 
 		# Save old firewall.
 		if terse_mode:
@@ -227,7 +240,7 @@ class Firewall:
 		try:
 			if terse_mode:
 				sys.stderr.write("activating new... ")
-			successful = Iptables.commit(lines)
+			successful = Iptables.commit(r4)
 			if terse_mode:
 				sys.stderr.write("success")
 			else:

@@ -45,7 +45,7 @@ class Host:
 			raise PyromanException("Host '%s' definition lacking IP address at %s" % (name, loginfo))
 		self.ip = Util.splitter.split(ip)
 		for i in self.ip:
-			if not Util.verify_ip4net(i):
+			if not Util.verify_ipnet(i):
 				raise PyromanException("IP specification '%s' invalid for host '%s' at %s" \
 					% (i, name, loginfo))
 		# verify and store interface
@@ -61,7 +61,7 @@ class Host:
 		# register with firewall
 		Firewall.hosts[name] = self
 
-	def get_filter(self, dir):
+	def get_filter4(self, dir):
 		"""
 		Generate filter rules for this host by generating a list of
 		filter rules for all source specifications
@@ -71,11 +71,30 @@ class Host:
 		# when necessary, turn around filter directions
 		result = []
 		for i in self.ip:
-			# for the "any" IP we don't need to print a parameter
-			if i == "0.0.0.0/0":
-				result.append("")
-			elif i != "":
-				result.append( "-%s %s" % (dir, i) )
+			if Util.verify_ip4net(i):
+				# for the "any" IP we don't need to print a parameter
+				if i == "0.0.0.0/0":
+					result.append("")
+				elif i != "":
+					result.append( "-%s %s" % (dir, i) )
+		return result
+	
+	def get_filter6(self, dir):
+		"""
+		Generate filter rules for this host by generating a list of
+		filter rules for all source specifications
+
+		dir -- either "d" or "s" for destination filter or source filter
+		"""
+		# when necessary, turn around filter directions
+		result = []
+		for i in self.ip:
+			if Util.verify_ip6net(i):
+				# for the "any" IP we don't need to print a parameter
+				if i == "::/0":
+					result.append("")
+				elif i != "":
+					result.append( "-%s %s" % (dir, i) )
 		return result
 	
 	def islocalhost(self):

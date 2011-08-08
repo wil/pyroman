@@ -26,5 +26,6 @@ from commands import *
 
 __all__ = [ 'PyromanException', 'Firewall', 'parseXML', 'add_chain',
 	'add_host', 'add_interface', 'add_nat', 'add_rule', 'add_service', 'allow',
-	'drop', 'host', 'interface', 'iptables', 'iptables_end', 'nat', 'port',
-	'reject', 'rule', 'service']
+	'drop', 'host', 'interface', 'iptables', 'iptables_end',
+	'ip6tables', 'ip6tables_end', 'ipXtables', 'ipXtables_end',
+	'nat', 'port', 'reject', 'rule', 'service']

@@ -88,25 +88,36 @@ class Chain:
 			if server and server.islocalhost() and client and client.islocalhost():
 				raise PyromanException("Localhost talking to localhost?")
 
-			crules = [""]
-			srules = [""]
+			crules4 = [""]
+			crules6 = [""]
+			srules4 = [""]
+			srules6 = [""]
 			ifrules = [""]
 			ofrules = [""]
 			if client:
-				crules = client.get_filter("s")
+				crules4 = client.get_filter4("s")
+				crules6 = client.get_filter6("s")
 			if server:
-				srules = server.get_filter("d")
+				srules4 = server.get_filter4("d")
+				srules6 = server.get_filter6("d")
 			if inface:
 				ifrules = inface.get_filter("s")
 			if outface:
 				ofrules = outface.get_filter("d")
 
-			for cr in crules:
-				for sr in srules:
+			for cr in crules4:
+				for sr in srules4:
 					for infi in ifrules:
 						for outfi in ofrules:
 							filter = "%s %s %s %s -j %s" % (infi, outfi, cr, sr, chain)
-							p.append(filter, loginfo)
+							p.append4(filter, loginfo)
+
+			for cr in crules6:
+				for sr in srules6:
+					for infi in ifrules:
+						for outfi in ofrules:
+							filter = "%s %s %s %s -j %s" % (infi, outfi, cr, sr, chain)
+							p.append6(filter, loginfo)
 
 			Firewall.chains[chain]=c
 			return c
@@ -127,37 +138,59 @@ class Chain:
 		self.loginfo = loginfo
 		self.table = table
 		self.default = default
-		self.rules = []
-		self.rules_end = []
+		self.rules4 = []
+		self.rules6 = []
+		self.rules4_end = []
+		self.rules6_end = []
 	
-	def append(self, statement, loginfo):
+	def append4(self, statement, loginfo):
 		"""
 		Append a statement to a chain
 		"""
-		self.rules.append([statement, loginfo])
+		self.rules4.append([statement, loginfo])
 
-	def append_end(self, statement, loginfo):
+	def append4_end(self, statement, loginfo):
 		"""
 		Append a statement to a chain
 		"""
-		self.rules_end.append([statement, loginfo])
-	
-	def dump_init(self):
-		print ":%s %s" % (self.name, self.default)
+		self.rules4_end.append([statement, loginfo])
 
-	def dump_rules(self):
-		for r in self.rules:
-			print "-A %s %s" % (self.name, r[0])
-		for r in self.rules_end:
-			print "-A %s %s" % (self.name, r[0])
-			
+	def append6(self, statement, loginfo):
+		"""
+		Append a statement to a chain
+		"""
+		self.rules6.append([statement, loginfo])
+
+	def append6_end(self, statement, loginfo):
+		"""
+		Append a statement to a chain
+		"""
+		self.rules6_end.append([statement, loginfo])
+
 	def get_init(self):
+		"""
+		Get the chain initializer statement
+		"""
 		return ":%s %s" % (self.name, self.default)
 
-	def get_rules(self):
+	def get_rules4(self):
+		"""
+		Get the rules for IPv4
+		"""
 		lines = []
-		for r in self.rules:
+		for r in self.rules4:
 			lines.append(["-A %s %s" % (self.name, r[0]), r[1]])
-		for r in self.rules_end:
+		for r in self.rules4_end:
+			lines.append(["-A %s %s" % (self.name, r[0]), r[1]])
+		return lines
+
+	def get_rules6(self):
+		"""
+		Get the rules for IPv6
+		"""
+		lines = []
+		for r in self.rules6:
+			lines.append(["-A %s %s" % (self.name, r[0]), r[1]])
+		for r in self.rules6_end:
 			lines.append(["-A %s %s" % (self.name, r[0]), r[1]])
 		return lines

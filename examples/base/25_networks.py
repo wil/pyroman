@@ -16,6 +16,6 @@ applies to all hosts.
 # you probably will want a 'network' specification like this.
 add_host(
 	name="ANY",
-	ip="0.0.0.0/0",
+	ip="0.0.0.0/0 ::/0",
 	iface="any"
 )

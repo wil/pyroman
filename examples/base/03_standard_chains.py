@@ -14,15 +14,15 @@ used here, so you can change them in one place only.
 # note that we're using the lowercase chain name
 Firewall.accept = "accept"
 add_chain(Firewall.accept)
-iptables(Firewall.accept, "-j ACCEPT")
+ipXtables(Firewall.accept, "-j ACCEPT")
 
 # this is a silent drop
 Firewall.drop = "drop"
 add_chain(Firewall.drop)
-iptables(Firewall.drop, "-j DROP")
+ipXtables(Firewall.drop, "-j DROP")
 
 # .. these are clean "reject" rules (i.e. send 'connection refused' back)
 Firewall.reject = "reject"
 add_chain(Firewall.reject)
-iptables(Firewall.reject, "-p tcp -j REJECT --reject-with tcp-reset")
-iptables(Firewall.reject, "-j REJECT")
+ipXtables(Firewall.reject, "-p tcp -j REJECT --reject-with tcp-reset")
+ipXtables(Firewall.reject, "-j REJECT")

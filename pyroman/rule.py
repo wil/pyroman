@@ -75,13 +75,15 @@ class Rule:
 			        (self.server and self.server.islocalhost())):
 				return
 
-		chain = Chain.get_chain(inface, outface, self.client, self.server, self.loginfo)
+		chain = Chain.get_chain(inface, outface, \
+			self.client, self.server, self.loginfo)
 
 		vrules = [""]
 		if self.service:
 			vrules = self.service.get_filter("d")
 		for vr in vrules:
-			chain.append("%s -j %s" % (vr, self.target), self.loginfo)
+			chain.append4("%s -j %s" % (vr, self.target), self.loginfo)
+			chain.append6("%s -j %s" % (vr, self.target), self.loginfo)
 
 	def prepare(self):
 		"""

@@ -175,7 +175,7 @@ def iptables(chain, filter):
 	loginfo = Util.get_callee(3)
 	if not Firewall.chains.has_key(chain):
 		raise PyromanException("Firewall chain %s not known (use add_chain!) at %s" % (chain, loginfo))
-	Firewall.chains[chain].append(filter, loginfo)
+	Firewall.chains[chain].append4(filter, loginfo)
 
 def iptables_end(chain, filter):
 	"""
@@ -188,4 +188,49 @@ def iptables_end(chain, filter):
 	loginfo = Util.get_callee(3)
 	if not Firewall.chains.has_key(chain):
 		raise PyromanException("Firewall chain %s not known (use add_chain!) at %s" % (chain, loginfo))
-	Firewall.chains[chain].append_end(filter, loginfo)
+	Firewall.chains[chain].append4_end(filter, loginfo)
+
+def ip6tables(chain, filter):
+	"""
+	Add an arbitrary ip6tables command.
+
+	chain -- chain to add the rules to
+	filter -- iptables parameters
+	"""
+	loginfo = Util.get_callee(3)
+	if not Firewall.chains.has_key(chain):
+		raise PyromanException("Firewall chain %s not known (use add_chain!) at %s" % (chain, loginfo))
+	Firewall.chains[chain].append6(filter, loginfo)
+
+def ip6tables_end(chain, filter):
+	"""
+	Add an arbitrary ip6tables command after any statement added
+	by the "allow", "drop", "reject", "add_rule" or "iptables" commands.
+
+	chain -- chain to add the rules to
+	filter -- iptables parameters
+	"""
+	loginfo = Util.get_callee(3)
+	if not Firewall.chains.has_key(chain):
+		raise PyromanException("Firewall chain %s not known (use add_chain!) at %s" % (chain, loginfo))
+
+def ipXtables(chain, filter):
+	"""
+	Add an arbitrary iptables + ip6tables command.
+
+	chain -- chain to add the rules to
+	filter -- iptables parameters
+	"""
+	iptables(chain, filter)
+	ip6tables(chain, filter)
+
+def ipXtables_end(chain, filter):
+	"""
+	Add an arbitrary iptables + ip6tables command after any statement added
+	by the "allow", "drop", "reject", "add_rule" or "iptables" commands.
+
+	chain -- chain to add the rules to
+	filter -- iptables parameters
+	"""
+	iptables_end(chain, filter)
+	ip6tables_end(chain, filter)

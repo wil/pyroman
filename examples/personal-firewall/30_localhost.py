@@ -7,7 +7,7 @@ in the INPUT and OUTPUT chains instead of FORWARD.
 add_host(
 	name="localhost",
 	hostname=Firewall.hostname,
-	ip="0.0.0.0/0",
+	ip="0.0.0.0/0 ::/0",
 	iface="any"
 )
 # if you want a restriction on outgoing connections, add that here.
