@@ -60,12 +60,13 @@ class Service:
 		# register with firewall object
 		Firewall.services[name] = self
 
-	def get_filter(self, dir):
+	def get_filter(self, dir, v4v6):
 		"""
 		Generate filter rules for this service by generating a list of
 		filter rules for all source and destination port combinations
 
 		dir -- either "d" or "s" for destination filter or source filter
+		v4v6 -- either 4 or 6 for IPv4 or IPv6
 		"""
 		# set 1 and 2 to source/dest filter characters
 		if dir == "d":
@@ -78,7 +79,11 @@ class Service:
 			raise PyromanException("Invalid direction specified: %s" % dir)
 		result = []
 		for sp in self.sports:
+			if v4v6 == 4 and not sp.forIPv4(): continue
+			if v4v6 == 6 and not sp.forIPv6(): continue
 			for dp in self.dports:
+				if v4v6 == 4 and not dp.forIPv4(): continue
+				if v4v6 == 6 and not dp.forIPv6(): continue
 				# only generate rules when source and destination protocol match
 				if not sp.proto or not dp.proto or sp.proto == dp.proto:
 					f1 = ""
@@ -92,7 +97,7 @@ class Service:
 						result.append( f1 + " " + f2 + " " + f3 )
 
 		for i in self.include:
-			result.extend( i.get_filter(dir) )
+			result.extend( i.get_filter(dir, v4v6) )
 		return result
 
 	def prepare(self):

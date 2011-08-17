@@ -45,7 +45,7 @@ class Port:
 	"""
 
 	# Split and verify syntax of statement
-	preg  = re.compile("^(?:([a-z0-9\-]+|[0-9]+(?:\:[0-9]+)?)(?:/))?(tcp|udp|icmp)$")
+	preg  = re.compile("^(?:([a-z0-9\-]+|[0-9]+(?:\:[0-9]+)?)(?:/))?(tcp|udp|icmp|icmpv6|ipv6-icmp)$")
 	# verify port range
 	prreg = re.compile("^([0-9]+:)?[0-9]+$")
 
@@ -92,12 +92,30 @@ class Port:
 			return ""
 		
 		if self.proto in ["tcp", "udp"]:
-			return "--%sport %s" % (dir, self.port)
+			return "--" + dir + "port " + self.port
 		elif self.proto == "icmp":
 			# ICMP doesn't have source ports
 			if dir == "d":
-				return "--icmp-type %s" % self.port
+				return "--icmp-type " + self.port
+			else:
+				return ""
+		elif self.proto in [ "icmpv6", "ipv6-icmp"]:
+			# ICMP doesn't have source ports
+			if dir == "d":
+				return "--icmpv6-type " + self.port
 			else:
 				return ""
 		else:
 			raise PyromanException("Unknown protocol: %s" % self.proto)
+
+	def forIPv4(self):
+		"""
+		Return true when compatible with IPv4
+		"""
+		return self.proto not in ["icmpv6", "ipv6-icmp"]
+
+	def forIPv6(self):
+		"""
+		Return true when compatible with IPv6
+		"""
+		return self.proto not in ["icmp"]

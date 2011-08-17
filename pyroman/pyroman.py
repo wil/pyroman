@@ -152,22 +152,26 @@ class Firewall:
 		for t in tables:
 			# try to provide some useful help info, in case some error occurs
 			l4.append( ["*%s" % t, "table select statement for table %s" % t] )
-			l6.append( ["*%s" % t, "table select statement for table %s" % t] )
+			if t != "nat":
+				l6.append( ["*%s" % t, "table select statement for table %s" % t] )
 			# first create all chains
 			for c in Firewall.chains.values():
 				if c.table == t:
 					l4.append( [c.get_init(), c.loginfo] )
-					l6.append( [c.get_init(), c.loginfo] )
+					if t != "nat":
+						l6.append( [c.get_init(), c.loginfo] )
 			# then write rules (which might -j to a table not yet created otherwise)
 			for c in Firewall.chains.values():
 				if c.table == t:
 					for l in c.get_rules4():
 						l4.append(l)
-					for l in c.get_rules6():
-						l6.append(l)
+					if t != "nat":
+						for l in c.get_rules6():
+							l6.append(l)
 			# commit after each table, try to make a useful error message possible
 			l4.append(["COMMIT", "commit statement for table %s" % t ])
-			l6.append(["COMMIT", "commit statement for table %s" % t ])
+			if t != "nat":
+				l6.append(["COMMIT", "commit statement for table %s" % t ])
 		return l4, l6
 	calciptableslines = staticmethod(calciptableslines)
 
@@ -240,7 +244,7 @@ class Firewall:
 		try:
 			if terse_mode:
 				sys.stderr.write("activating new... ")
-			successful = Iptables.commit(r4)
+			successful = Iptables.commit( (r4, r6) )
 			if terse_mode:
 				sys.stderr.write("success")
 			else:

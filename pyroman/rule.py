@@ -78,11 +78,13 @@ class Rule:
 		chain = Chain.get_chain(inface, outface, \
 			self.client, self.server, self.loginfo)
 
-		vrules = [""]
+		vrules4, vrules6 = [""], [""]
 		if self.service:
-			vrules = self.service.get_filter("d")
-		for vr in vrules:
+			vrules4 = self.service.get_filter("d", 4)
+			vrules6 = self.service.get_filter("d", 6)
+		for vr in vrules4:
 			chain.append4("%s -j %s" % (vr, self.target), self.loginfo)
+		for vr in vrules6:
 			chain.append6("%s -j %s" % (vr, self.target), self.loginfo)
 
 	def prepare(self):

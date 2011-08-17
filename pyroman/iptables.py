@@ -120,12 +120,13 @@ class Iptables:
 		"""
 		Commit iptables rules from a list of (annotated!) commands
 		"""
+		lines4, lines6 = lines
 		# TODO: verify that the lines don't contain linewraps
 		# and have logging info!
 		scmd = subprocess.Popen(Iptables.ip4tablesset,
 			stdin=subprocess.PIPE,
 			stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-		for line in lines:
+		for line in lines4:
 			scmd.stdin.write(line[0])
 			scmd.stdin.write("\n")
 		scmd.stdin.close()
@@ -139,7 +140,44 @@ class Iptables:
 			if not errormsg[1]:
 				m = Iptables.match_errorline.match(line)
 				if m:
-					errormsg[1] = lines[int(m.group(1))-1][1]
+					errormsg[1] = lines4[int(m.group(1))-1][1]
+					continue
+			# try to grab a detailed error description
+			if not errormsg[0]:
+				m = Iptables.match_errormsg.match(line)
+				if m:
+					errormsg[0] = m.group(1)
+					continue
+			# ignore the default "info" message
+			m = Iptables.match_hidemsg.match(line)
+			if m:
+				continue
+			# print remaining lines
+			sys.stderr.write(line)
+		success = (scmd.wait() == 0)
+		if not success:
+			if errormsg:
+				raise Iptables.Error("Firewall commit failed: %s, caused by %s" % (errormsg[0], errormsg[1]))
+			else:
+				raise Iptables.Error("Firewall commit failed due to unknown error.")
+		scmd = subprocess.Popen(Iptables.ip6tablesset,
+			stdin=subprocess.PIPE,
+			stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		for line in lines6:
+			scmd.stdin.write(line[0])
+			scmd.stdin.write("\n")
+		scmd.stdin.close()
+		# output any error
+		errormsg = [ None, None ]
+		for line in scmd.stdout.readlines():
+			# skip empty lines
+			if line=="\n":
+				continue
+			# try to grab the error message with line number
+			if not errormsg[1]:
+				m = Iptables.match_errorline.match(line)
+				if m:
+					errormsg[1] = lines6[int(m.group(1))-1][1]
 					continue
 			# try to grab a detailed error description
 			if not errormsg[0]:

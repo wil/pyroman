@@ -85,6 +85,8 @@ class Nat:
 		target = "SNAT --to-source %s" % self.ip
 		# do we have a port restriction?
 		pfilter = ""
+		# TODO: avoid IPv6 rules.
+		# TODO: verify ports agree?
 		if self.port and self.dport:
 			pfilter = self.dport.get_filter_proto() + " " + self.dport.get_filter_port("s")
 			target = target + ":%s" % self.port.port
@@ -104,6 +106,8 @@ class Nat:
 		filter = iff[0] + " -d %s" % self.ip
 		# do we have a port restriction?
 		pfilter = ""
+		# TODO: avoid IPv6 rules.
+		# TODO: verify ports agree?
 		if self.port:
 			pfilter = self.port.get_filter_proto() + " " + self.port.get_filter_port("d")
 

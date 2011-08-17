@@ -16,7 +16,7 @@ Ports can be given with their names (as of /etc/services), with port ranges
 """
 ### these are shorthands for very common services
 # Ping
-add_service("ping", dports="echo-request/icmp")
+add_service("ping", dports="echo-request/icmp echo-request/icmpv6")
 # Secure Shell
 add_service("ssh", dports="ssh/tcp")
 # Domain Name Server
