@@ -57,6 +57,8 @@ class Nat:
 				self.port = Port(port)
 			except PortInvalidSpec:
 				raise PyromanException("Nat port specification invalid: (client: %s, server: %s, ip: %s, port: %s) at %s " % (client, server, ip, port, loginfo))
+			if not self.port.forIPv4():
+				raise PyromanException("Non-IPv4 port specified: "+port)
 		else:
 			self.port = None
 		if dport:
@@ -64,6 +66,8 @@ class Nat:
 				self.dport = Port(dport)
 			except PortInvalidSpec:
 				raise PyromanException("Nat dport specification invalid: (client: %s, server: %s, ip: %s, port: %s, dport: %s) at %s " % (client, server, ip, port, dport, loginfo))
+			if not self.dport.forIPv4():
+				raise PyromanException("Non-IPv4 port specified: "+dport)
 		else:
 			self.dport = None
 		if self.dport and not (self.port.proto == self.dport.proto):
@@ -85,8 +89,6 @@ class Nat:
 		target = "SNAT --to-source %s" % self.ip
 		# do we have a port restriction?
 		pfilter = ""
-		# TODO: avoid IPv6 rules.
-		# TODO: verify ports agree?
 		if self.port and self.dport:
 			pfilter = self.dport.get_filter_proto() + " " + self.dport.get_filter_port("s")
 			target = target + ":%s" % self.port.port
@@ -96,7 +98,7 @@ class Nat:
 		c = Firewall.chains["natPOST"]
 		for sip in server.ip:
 			filter = iff[0] + " -s %s" % sip
-			c.append("%s %s -j %s" % (filter, pfilter, target), self.loginfo)
+			c.append4("%s %s -j %s" % (filter, pfilter, target), self.loginfo)
 
 	def gen_dnat(self, client, server):
 		"""
@@ -106,8 +108,6 @@ class Nat:
 		filter = iff[0] + " -d %s" % self.ip
 		# do we have a port restriction?
 		pfilter = ""
-		# TODO: avoid IPv6 rules.
-		# TODO: verify ports agree?
 		if self.port:
 			pfilter = self.port.get_filter_proto() + " " + self.port.get_filter_port("d")
 
@@ -116,7 +116,7 @@ class Nat:
 			target = "DNAT --to-destination %s" % sip
 			if self.dport:
 				target = target + ":%s" % self.dport.port
-			c.append("%s %s -j %s" % (filter, pfilter, target), self.loginfo)
+			c.append4("%s %s -j %s" % (filter, pfilter, target), self.loginfo)
 
 	def generate(self):
 		for c in self.client:
