@@ -93,7 +93,7 @@ class Service:
 						f1 = dp.get_filter_proto() + " "
 					f2 = sp.get_filter_port(dir1)
 					f3 = dp.get_filter_port(dir2)
-					if f2 != "" or f3 != "":
+					if f1.strip() or f2 != "" or f3 != "":
 						result.append( f1 + " " + f2 + " " + f3 )
 
 		for i in self.include:

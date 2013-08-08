@@ -45,7 +45,7 @@ class Port:
 	"""
 
 	# Split and verify syntax of statement
-	preg  = re.compile("^(?:([a-z0-9\-]+|[0-9]+(?:\:[0-9]+)?)(?:/))?(tcp|udp|icmp|icmpv6|ipv6-icmp)$")
+	preg  = re.compile("^(?:([a-z0-9\-]+|[0-9]+(?:\:[0-9]+)?)(?:/))?(tcp|udp|esp|ah|icmp|icmpv6|ipv6-icmp)$")
 	# verify port range
 	prreg = re.compile("^([0-9]+:)?[0-9]+$")
 
@@ -66,7 +66,7 @@ class Port:
 			self.proto = m.group(2)
 
 			# if it's a named port, verify it's resolveable...
-			if not self.prreg.match(self.port) and self.proto in ["udp", "tcp"]:
+			if self.proto in ["udp", "tcp"] and not self.prreg.match(self.port):
 				try:
 					socket.getservbyname(self.port, self.proto)
 				except socket.error:
@@ -105,6 +105,9 @@ class Port:
 				return "--icmpv6-type " + self.port
 			else:
 				return ""
+		elif self.proto in ("esp", "ah"):
+			# no port for ESP and AH
+			return ""
 		else:
 			raise PyromanException("Unknown protocol: %s" % self.proto)
 
